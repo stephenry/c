@@ -80,7 +80,7 @@ always_ff @(posedge clk) begin : in_reg_PROC
   uut_any_r <= i_any;
 end : in_reg_PROC
 
-{{uut_name}} #(.W({{W}}), .ENC_W({{ENC_W}}) u_uut (
+{{uut_name}} #(.W({{W}})) u_uut (
 //
   .i_x                  (uut_x_r)
 , .i_pos                (uut_pos_r)
