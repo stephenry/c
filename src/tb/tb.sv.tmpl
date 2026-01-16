@@ -28,15 +28,15 @@
 `include "common_defs.vh"
 
 module tb (
-  input wire logic                               i_vld
-, input wire logic [{{W}} - 1:0]                 i_x
-, input wire logic [$clog2({{W}}) - 1:0]         i_pos
-, input wire logic                               i_any
+  input wire logic                               vld_i
+, input wire logic [{{w}} - 1:0]                 x_i
+, input wire logic [$clog2({{w}}) - 1:0]         pos_i
+, input wire logic                               any_i
 
 //
-, output wire logic                              o_vld
-, output wire logic [{{W}} - 1:0]                o_y
-, output wire logic [$clog2({{W}}) - 1:0]        o_y_enc
+, output wire logic                              vld_o
+, output wire logic [{{w}} - 1:0]                y_o
+, output wire logic [$clog2({{w}}) - 1:0]        y_enc_o
 
 , input wire logic                               clk
 , input wire logic                               arst_n
@@ -49,14 +49,14 @@ module tb (
 //========================================================================== //
 
 logic                           uut_vld_r;
-logic [{{W}} - 1:0]             uut_x_r;
-logic [$clog2({{W}}) - 1:0]     uut_pos_r;
+logic [{{w}} - 1:0]             uut_x_r;
+logic [$clog2({{w}}) - 1:0]     uut_pos_r;
 logic                           uut_any_r;
 
-logic [{{W}} - 1:0]             uut_y_w;
-logic [{{W}} - 1:0]             uut_y_r;
-logic [$clog2({{W}}) - 1:0]     uut_y_enc_w;
-logic [$clog2({{W}}) - 1:0]     uut_y_enc_r;
+logic [{{w}} - 1:0]             uut_y_w;
+logic [{{w}} - 1:0]             uut_y_r;
+logic [$clog2({{w}}) - 1:0]     uut_y_enc_w;
+logic [$clog2({{w}}) - 1:0]     uut_y_enc_r;
 
 logic                           out_vld_w;
 logic                           out_vld_r;
@@ -80,14 +80,14 @@ always_ff @(posedge clk) begin : in_reg_PROC
   uut_any_r <= i_any;
 end : in_reg_PROC
 
-{{uut_name}} #(.W({{W}})) u_uut (
+{{uut_name}} #(.W({{w}})) u_uut (
 //
-  .i_x                  (uut_x_r)
-, .i_pos                (uut_pos_r)
-, .i_any                (uut_any_r)
+  .x_i                  (uut_x_r)
+, .pos_i                (uut_pos_r)
+, .any_i                (uut_any_r)
 //
-, .o_y                  (uut_y_w)
-, .o_y_enc              (uut_y_enc_w)
+, .y_o                  (uut_y_w)
+, .y_enc_o              (uut_y_enc_w)
 );
 
 always_ff @(posedge clk or negedge arst_n) : out_vld_reg_PROC
@@ -108,8 +108,8 @@ end : out_reg_PROC
 //                                                                           //
 //========================================================================== //
 
-assign o_vld = out_vld_r;
-assign o_y = uut_y_r;
-assign o_y_enc = uut_y_enc_r;
+assign vld_o = out_vld_r;
+assign y_o = uut_y_r;
+assign y_enc_o = uut_y_enc_r;
 
 endmodule : tb

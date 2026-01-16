@@ -25,35 +25,46 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //========================================================================== //
 
-`include "common_defs.vh"
+`include "common_defs.svh"
 
-// Circuit to compute the cicular left-most '0' in a vector 'x' for a
-// given position. 'any' flag computes first '0' from lsb.
-//
-//   x                    (pos, any)   y                      y_enc
-//   -----------------------------------------------------------------------
-//   1111_1111_1111_1110     x, true   0000_0000_0000_0001    0
-//
-//   0000_0000_0000_0000     0, false  1000_0000_0000_0000    15
-//
-//   0000_0000_0000_0000     1, false  0000_0000_0000_0001    0
-//
-//   0000_0000_0000_0000    15, false  0100_0000_0000_0000    14
-
-module s #(
-  // Vector width
+module rev #(
+  // Width of encoded input
   parameter int W
 ) (
+// -------------------------------------------------------------------------- //
+// Decoded input
   input wire logic [W - 1:0]                     x_i
-, input wire logic [$clog2(W) - 1:0]             pos_i
-, input wire logic                               any_i
 
-//
+// -------------------------------------------------------------------------- //
+// Encoded output
 , output wire logic [W - 1:0]                    y_o
-, output wire logic [$clog2(W) - 1:0]            y_enc_o
 );
 
-assign y_o = '0;
-assign y_enc_o = '0;
+// ========================================================================== //
+//                                                                            //
+//  Wires                                                                     //
+//                                                                            //
+// ========================================================================== //
 
-endmodule : s
+logic [W - 1:0]                        y;
+
+// -------------------------------------------------------------------------- //
+// Form encoder structure by deriving a vector of indices (denoting the
+// relative position in the bitvector). Using the mux. primitive, select
+// the appropriate index as necessary.
+//
+for (genvar i = 0; i < W; i++) begin : idx_GEN
+
+assign y[i] = x_i[W - 1 - i];
+
+end : idx_GEN
+
+// ========================================================================== //
+//                                                                            //
+//  Outputs                                                                   //
+//                                                                            //
+// ========================================================================== //
+
+assign y_o = y;
+
+endmodule : rev
