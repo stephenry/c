@@ -27,6 +27,19 @@
 
 `include "common_defs.vh"
 
+// Circuit to compute the cicular left-most '0' in a vector 'x' for a
+// given position. 'any' flag computes first '0' from lsb.
+//
+//   x                    (pos, any)   y                      y_enc
+//   -----------------------------------------------------------------------
+//   1111_1111_1111_1110     x, true   0000_0000_0000_0001    0
+//
+//   0000_0000_0000_0000     0, false  1000_0000_0000_0000    15
+//
+//   0000_0000_0000_0000     1, false  0000_0000_0000_0001    0
+//
+//   0000_0000_0000_0000    15, false  0100_0000_0000_0000    14
+
 module s #(
   // Vector width
   parameter int W
@@ -34,12 +47,13 @@ module s #(
   // Encoded width
 , localparam int ENC_W = $clog2(W)
 ) (
-  input wire logic [W - 1:0]                     x
-, input wire logic [ENC_W - 1:0]                 pos
+  input wire logic [W - 1:0]                     i_x
+, input wire logic [ENC_W - 1:0]                 i_pos
+, input wire logic                               i_any
 
 //
-, output wire logic [W - 1:0]                    y
-, output wire logic [EN_W - 1:0]                 y_enc
+, output wire logic [W - 1:0]                    o_y
+, output wire logic [EN_W - 1:0]                 o_y_enc
 );
 
 assign y = '0;

@@ -1,0 +1,115 @@
+//========================================================================== //
+// Copyright (c) 2026, Stephen Henry
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//========================================================================== //
+
+`include "common_defs.vh"
+
+module tb (
+  input wire logic                               i_vld
+, input wire logic [{{W}} - 1:0]                 i_x
+, input wire logic [{{ENC_W}} - 1:0]             i_pos
+, input wire logic                               i_any
+
+//
+, output wire logic                              o_vld
+, output wire logic [{{W}} - 1:0]                o_y
+, output wire logic [{{ENC_W}} - 1:0]            o_y_enc
+
+, input wire logic                               clk
+, input wire logic                               arst_n
+);
+
+//========================================================================== //
+//                                                                           //
+// Wires                                                                     //
+//                                                                           //
+//========================================================================== //
+
+logic                           uut_vld_r;
+logic [{{W}} - 1:0]             uut_x_r;
+logic [{{ENC_W}} - 1:0]         uut_pos_r;
+logic                           uut_any_r;
+
+logic [{{W}} - 1:0]             uut_y_w;
+logic [{{W}} - 1:0]             uut_y_r;
+logic [{{ENC}} - 1:0]           uut_y_enc_w;
+logic [{{ENC}} - 1:0]           uut_y_enc_r;
+
+logic                           out_vld_w;
+logic                           out_vld_r;
+
+//========================================================================== //
+//                                                                           //
+// UUT                                                                       //
+//                                                                           //
+//========================================================================== //
+
+always_ff @(posedge clk or negedge arst_n) begin : in_vld_reg_PROC
+  if (~arst_n)
+    uut_vld_r <= 1'b0;
+  else
+    uut_vld_r <= i_vld;
+end : in_vld_reg_PROC
+
+always_ff @(posedge clk) begin : in_reg_PROC
+  uut_x_r <= i_x;
+  uut_pos_r <= i_pos;
+  uut_any_r <= i_any;
+end : in_reg_PROC
+
+{{uut_name}} #(.W({{W}}), .ENC_W({{ENC_W}}) u_uut (
+//
+  .i_x                  (uut_x_r)
+, .i_pos                (uut_pos_r)
+, .i_any                (uut_any_r)
+//
+, .o_y                  (uut_y_w)
+, .o_y_enc              (uut_y_enc_w)
+);
+
+always_ff @(posedge clk or negedge arst_n) : out_vld_reg_PROC
+  if (~arst_n)
+    out_vld_r <= 1'b0;
+  else
+    out_vld_r <= out_vld_w;
+end : out_vld_reg_PROC
+
+always_ff @(posedge clk) begin : out_reg_PROC
+  uut_y_r <= uut_y_w;
+  uut_y_enc_r <= uut_y_enc_w;
+end : out_reg_PROC
+
+//========================================================================== //
+//                                                                           //
+// Output                                                                    //
+//                                                                           //
+//========================================================================== //
+
+assign o_vld = out_vld_r;
+assign o_y = uut_y_r;
+assign o_y_enc = uut_y_enc_r;
+
+endmodule : tb
