@@ -76,7 +76,7 @@ ENV OPENSTA_ROOT=/tools/OpenSTA
 
 ARG VERILATOR_VER="5.034"
 RUN wget https://github.com/verilator/verilator/archive/refs/tags/v${VERILATOR_VER}.tar.gz \
-  && tar -zxf v${VERILATOR_VER}.tar.gz \`
+  && tar -zxf v${VERILATOR_VER}.tar.gz \
   && cd verilator-${VERILATOR_VER} \
   && autoconf \
   && ./configure \
