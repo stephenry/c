@@ -12,7 +12,8 @@
 				"ms-vscode.cpptools",
 				"ms-vscode.cmake-tools",
 				"ms-python.python",
-				"ms-python.debugpy"
+				"ms-python.debugpy",
+				"EditorConfig.EditorConfig"
 			]
 		}
 	}
