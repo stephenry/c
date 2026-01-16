@@ -49,9 +49,7 @@ module rev #(
 logic [W - 1:0]                        y;
 
 // -------------------------------------------------------------------------- //
-// Form encoder structure by deriving a vector of indices (denoting the
-// relative position in the bitvector). Using the mux. primitive, select
-// the appropriate index as necessary.
+// Bit-Reverse the input vector. No logic overhead.
 //
 for (genvar i = 0; i < W; i++) begin : idx_GEN
 
