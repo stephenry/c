@@ -43,20 +43,17 @@
 module s #(
   // Vector width
   parameter int W
-
-  // Encoded width
-, localparam int ENC_W = $clog2(W)
 ) (
   input wire logic [W - 1:0]                     i_x
-, input wire logic [ENC_W - 1:0]                 i_pos
+, input wire logic [$clog2(W) - 1:0]             i_pos
 , input wire logic                               i_any
 
 //
 , output wire logic [W - 1:0]                    o_y
-, output wire logic [EN_W - 1:0]                 o_y_enc
+, output wire logic [$clog2(W) - 1:0]            o_y_enc
 );
 
-assign y = '0;
-assign y_enc = '0;
+assign o_y = '0;
+assign o_y_enc = '0;
 
 endmodule : s

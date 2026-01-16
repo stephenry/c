@@ -30,13 +30,13 @@
 module tb (
   input wire logic                               i_vld
 , input wire logic [{{W}} - 1:0]                 i_x
-, input wire logic [{{ENC_W}} - 1:0]             i_pos
+, input wire logic [$clog2({{W}}) - 1:0]         i_pos
 , input wire logic                               i_any
 
 //
 , output wire logic                              o_vld
 , output wire logic [{{W}} - 1:0]                o_y
-, output wire logic [{{ENC_W}} - 1:0]            o_y_enc
+, output wire logic [$clog2({{W}}) - 1:0]        o_y_enc
 
 , input wire logic                               clk
 , input wire logic                               arst_n
@@ -50,13 +50,13 @@ module tb (
 
 logic                           uut_vld_r;
 logic [{{W}} - 1:0]             uut_x_r;
-logic [{{ENC_W}} - 1:0]         uut_pos_r;
+logic [$clog2({{W}}) - 1:0]     uut_pos_r;
 logic                           uut_any_r;
 
 logic [{{W}} - 1:0]             uut_y_w;
 logic [{{W}} - 1:0]             uut_y_r;
-logic [{{ENC}} - 1:0]           uut_y_enc_w;
-logic [{{ENC}} - 1:0]           uut_y_enc_r;
+logic [$clog2({{W}}) - 1:0]     uut_y_enc_w;
+logic [$clog2({{W}}) - 1:0]     uut_y_enc_r;
 
 logic                           out_vld_w;
 logic                           out_vld_r;
