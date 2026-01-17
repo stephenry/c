@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug TB",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "tb",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src"
+        }
+    ]
+}
