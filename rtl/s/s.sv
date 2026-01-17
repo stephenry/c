@@ -94,47 +94,41 @@ logic [$clog2(W) - 1:0]                y_enc;
 //
 //     1111_1111_1000_0000         where pos=7          // (1)
 //
+maske #(.W(W), .P_INCLUSIVE(1'b1), .LEFT_NOT_RIGHT(1'b1))
+   u_maske_pre (.x_i(pos_i), .y_o(pre_1));
+
 // OR this mask with in input.
 //
 //     1111_1111_1101_1001                              // (2)
 //
-// Perform a bit revserse on the result of (2). No logic overhead.
+assign pre_2 = (x_i | pre_1);
+
+// Perform a bit reverse on the result of (2). No logic overhead.
 //
 //     1001_1011_1111_1111                              // (3)
 //
+rev #(.W(W)) u_rev_0_pre (.x_i(pre_2), .y_o(pre_3));
+
 // Increment vector from (3).
 //
 //     1001_1100_0000_0000                              // (4)
 //
+inc #(.W(W)) u_inc_pre (.x_i(pre_3), .y_o(pre_4), .carry_o(/* UNUSED */));
+
 // Detect the bit which transitions from '1' to '0' in (3) to (4).
 //
 //     0000_0100_0000_0000                              // (5)
 //
+assign pre_5 = (~pre_3 & pre_4);
+
 // Reverse (5) to obtain the final output.
 //
 //     0000_0000_0010_0000                              // (6)
 //
 // The 1-hot output indicates the first '0' preceeding pos_i.
 //
-
-// (1)
-maske #(.W(W), .P_INCLUSIVE(1'b1), .LEFT_NOT_RIGHT(1'b1))
-   u_maske_pre (.x_i(pos_i), .y_o(pre_1));
-
-// (2)
-assign pre_2 = (x_i | pre_1);
-
-// (3)
-rev #(.W(W)) u_rev_0_pre (.x_i(pre_2), .y_o(pre_3));
-
-// (4)
-inc #(.W(W)) u_inc_pre (.x_i(pre_3), .y_o(pre_4), .carry_o(/* UNUSED */));
-
-// (5)
-assign pre_5 = (~pre_3 & pre_4);
-
-// (6)
 rev #(.W(W)) u_rev_1_pre (.x_i(pre_5), .y_o(pre_6));
+
 
 // ------------------------------------------------------------------------- //
 // For bits succeeding pos_i in a circular manner.
@@ -147,37 +141,35 @@ rev #(.W(W)) u_rev_1_pre (.x_i(pre_5), .y_o(pre_6));
 //
 //     1001_1010_0100_1011                              // (1)
 //
+rev #(.W(W)) u_rev_post (.x_i(x_i), .y_o(post_1));
+
 // Increment the vector from (1).
 //
 //     1001_1010_0100_1100                              // (2)
 //
+inc #(.W(W)) u_inc_post (.x_i(post_1), .y_o(post_2), .carry_o(/* UNUSED */));
+
 // Detect the bit which transitions from '1' to '0' in (1) to
 //
 //     0000_0000_0000_0100                              // (3)
 //
+assign post_3 = (~post_1 & post_2);
+
 // Reverse (3) to obtain the final output.
 //
 //     0010_0000_0000_0000                              // (4)
 //
 // The 1-hot output indicates the first '0' succeeding pos_i.
-
-// (1)
-rev #(.W(W)) u_rev_post (.x_i(x_i), .y_o(post_1));
-
-// (2)
-inc #(.W(W)) u_inc_post (.x_i(post_1), .y_o(post_2), .carry_o(/* UNUSED */));
-
-// (3)
-assign post_3 = (~post_1 & post_2);
-
-// (4)
+//
 rev #(.W(W)) u_rev_post2 (.x_i(post_3), .y_o(post_4));
+
 
 // ------------------------------------------------------------------------- //
 // If no bit is found in the bits preceeding pos_i, use the output
 // from the succeeding bits logic.
 //
 assign y = (pre_2 != '1) ? pre_6 : post_4;
+
 
 // ------------------------------------------------------------------------- //
 // 'Any' flag; indicate that a 'b0 is present in the input vector. The
