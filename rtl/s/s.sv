@@ -28,17 +28,25 @@
 `include "common_defs.svh"
 
 // Circuit to compute the cicular left-most '0' in a vector 'x' for a
-// given position. 'any' flag computes first '0' from lsb.
+// given position. 'any' flag indicates output validity.
 //
 //   x                       pos   y                      y_enc    any
 //   -----------------------------------------------------------------------
+//
 //   1111_1111_1111_1110     0     0000_0000_0000_0001    0        1
+//                     ^
 //
 //   0000_0000_0000_0000     0     1000_0000_0000_0000    15       1
+//                     ^
 //
 //   0000_0000_0000_0000     1     0000_0000_0000_0001    0        1
+//                    ^
 //
 //   0000_0000_0000_0000    15     0100_0000_0000_0000    14       1
+//   ^
+//
+//   0010_1010_0011_0111     8     0000_0001_0000_0000    8        1
+//           ^
 //
 //   1111_1111_1111_1111     x     xxxx_xxxx_xxxx_xxxx    x        0
 
