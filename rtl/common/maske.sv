@@ -63,7 +63,7 @@ logic [W - 1:0]                        y;
 // -------------------------------------------------------------------------- //
 // Mask generation logic.
 //
-// Code appearly overly complex, and it is. But, it is done like this
+// Code appears overly complex, and it is! But, it is done like this
 // to avoid lint-violations on bounary indices (i == 0 and i == W - 1) where
 // comparisons become constant. Constant expressions for certain indices
 // are okay in a loop, but some linters complain about them, so they have
