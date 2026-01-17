@@ -25,13 +25,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //========================================================================== //
 
-`ifndef RTL_COMMON_DEFS_VH
-`define RTL_COMMON_DEFS_VH
-
 // Default timescale
 `timescale 1ns/1ps
 
 // Default nettype
 `default_nettype none
-
-`endif

@@ -46,6 +46,14 @@ module maske #(
 
 // ========================================================================== //
 //                                                                            //
+//  Localparams                                                               //
+//                                                                            //
+// ========================================================================== //
+
+localparam int X_W = $bits(x_i);
+
+// ========================================================================== //
+//                                                                            //
 //  Wires                                                                     //
 //                                                                            //
 // ========================================================================== //
@@ -53,31 +61,89 @@ module maske #(
 logic [W - 1:0]                        y;
 
 // -------------------------------------------------------------------------- //
+// Mask generation logic.
 //
-for (genvar i = 0; i < W; i++) begin : idx_GEN
+// Code appearly overly complex, and it is. But, it is done like this
+// to avoid lint-violations on bounary indices (i == 0 and i == W - 1) where
+// comparisons become constant. Constant expressions for certain indices
+// are okay in a loop, but some linters complain about them, so they have
+// to be written out explicitly.
+//
+generate begin : mask_GEN
+  
+  for (genvar i = 0; i < W; i++) begin : idx_GEN
 
-generate
-case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
-  2'b00: begin
-    // Right exclusive
-    assign y[i] = (x_i > i[W - 1:0]) ? 1'b1 : 1'b0;
-  end
-  2'b01: begin
-    // Left exclusive
-    assign y[i] = (x_i < i[W - 1:0]) ? 1'b1 : 1'b0;
-  end
-  2'b10: begin
-    // Right inclusive
-    assign y[i] = (x_i >= i[W - 1:0]) ? 1'b1 : 1'b0;
-  end
-  2'b11: begin
-    // Left inclusive
-    assign y[i] = (x_i <= i[W - 1:0]) ? 1'b1 : 1'b0;
-  end
-endcase
-endgenerate
+  if (i == 0) begin : first_BIT_GEN
 
-end : idx_GEN
+    case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
+      2'b00: begin
+        // Right exclusive
+        assign y[i] = (x_i != 'b0);
+      end
+      2'b01: begin
+        // Left exclusive
+        assign y[i] = 1'b0;
+      end
+      2'b10: begin
+        // Right inclusive
+        assign y[i] = 1'b1;
+      end
+      2'b11: begin
+        // Left inclusive
+        assign y[i] = (x_i == 'b0);
+      end
+    endcase
+
+  end : first_BIT_GEN
+  else if (i == (W - 1)) begin : last_BIT_GEN
+
+    case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
+      2'b00: begin
+        // Right exclusive
+        assign y[i] = 1'b0;
+      end
+      2'b01: begin
+        // Left exclusive
+        assign y[i] = (x_i != i[X_W - 1:0]);
+      end
+      2'b10: begin
+        // Right inclusive
+        assign y[i] = (x_i == i[X_W - 1:0]);
+      end
+      2'b11: begin
+        // Left inclusive
+        assign y[i] = 1'b1;
+      end
+    endcase
+
+  end : last_BIT_GEN
+  else begin : other_BITS_GEN
+
+    case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
+      2'b00: begin
+        // Right exclusive
+        assign y[i] = (x_i > i[X_W - 1:0]);
+      end
+      2'b01: begin
+        // Left exclusive
+        assign y[i] = (x_i < i[X_W - 1:0]);
+      end
+      2'b10: begin
+        // Right inclusive
+        assign y[i] = (x_i >= i[X_W - 1:0]);
+      end
+      2'b11: begin
+        // Left inclusive
+        assign y[i] = (x_i <= i[X_W - 1:0]);
+      end
+    endcase
+
+  end : other_BITS_GEN
+
+  end : idx_GEN
+
+end endgenerate
+
 
 // ========================================================================== //
 //                                                                            //
@@ -87,4 +153,4 @@ end : idx_GEN
 
 assign y_o = y;
 
-endmodule : mask
+endmodule : maske
