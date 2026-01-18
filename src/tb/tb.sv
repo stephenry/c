@@ -43,7 +43,6 @@ module tb #(
 , output wire logic [W - 1:0]                    y_o
 , output wire logic [$clog2(W) - 1:0]            y_enc_o
 
-// , input wire logic                               clk
 , input wire logic                               arst_n
 );
 
@@ -71,13 +70,26 @@ logic [$clog2(W) - 1:0]         out_y_enc_r;
 
 //========================================================================== //
 //                                                                           //
-// UUT                                                                       //
+// Clock                                                                     //
 //                                                                           //
 //========================================================================== //
+
+// NOTES: Typically, I would inject the clock from the testbench, but for
+// but in cocotb it seems like this is not supported when using
+// Verilator. When attempting to drive the clk from the testbench, a
+// VPI related crash occurs. This is a known issue when using
+// Verilator with cocotb.
 
 logic clk = 0;
 
 always #5 clk = ~clk;
+
+//========================================================================== //
+//                                                                           //
+// UUT                                                                       //
+//                                                                           //
+//========================================================================== //
+
 
 always_ff @(posedge clk) begin : in_reg_PROC
   in_x_r <= x_i;
