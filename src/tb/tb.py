@@ -29,6 +29,7 @@ import pathlib
 import os
 import sys
 
+
 def _project_root(anchor: str = "README.md") -> pathlib.Path:
     def _recurse(path: pathlib.Path) -> pathlib.Path:
         if (path / anchor).exists():
@@ -95,37 +96,33 @@ INCLUDE_DIRS = [
 WS = [16]
 
 
-def compile_and_run(
-    project:str, w: int, sources: list[pathlib.Path]
-) -> None:
+def compile_and_run(project: str, w: int, sources: list[pathlib.Path]) -> None:
     from cocotb_tools.runner import get_runner
 
     def _escape_string(s: str) -> str:
-        return f"\"{s}\""
+        return f'"{s}"'
 
     parameters = {
-        'W': w,
-        'P_UUT_NAME': _escape_string(project),
+        "W": w,
+        "P_UUT_NAME": _escape_string(project),
     }
 
     runner = get_runner("verilator")
     runner.build(
-        sources=sources, 
-        hdl_toplevel="tb", 
-        build_dir="./build", 
+        sources=sources,
+        hdl_toplevel="tb",
+        build_dir="./build",
         waves=True,
         includes=INCLUDE_DIRS,
         parameters=parameters,
-        build_args=["--trace", "--timing"]
+        build_args=["--trace", "--timing"],
     )
 
     test_module = pathlib.Path(__file__).parent / "tests.py"
 
     sys.path.insert(0, str(test_module.parent))
 
-    runner.test(
-        hdl_toplevel="tb", test_module="tests", waves=True
-    )
+    runner.test(hdl_toplevel="tb", test_module="tests", waves=True)
 
     if os.path.exists("waves.vcd"):
         print(f"Waveform generated at: waves.vcd")
