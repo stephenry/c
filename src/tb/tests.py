@@ -25,27 +25,13 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ## ========================================================================= ##
 
-import sys
-import os
-import pathlib
+import cocotb
 
+from cocotb.clock import Clock
+from cocotb.triggers import Timer
 
-def setup_environment():
-    verilator_root = os.environ.get("VERILATOR_ROOT")
-    if verilator_root is None:
-        raise EnvironmentError("VERILATOR_ROOT environment variable is not set.")
+@cocotb.test()
+async def simple_testbench(dut):
+    Clock(dut.clk, 10, unit="ns").start()
 
-    verilator = pathlib.Path(verilator_root) / "bin" / "verilator"
-    os.environ["PATH"] += os.pathsep + str(verilator.parent)
-
-if __name__ == "__main__":
-    try:
-        setup_environment()
-
-        from .tb import main as tb_main
-
-        tb_main()
-        sys.exit(0)
-    except EnvironmentError as e:
-        print(f"Testbench failed with error: {e}")
-        sys.exit(1)
+    await Timer(1000, unit="ns")

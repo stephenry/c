@@ -25,15 +25,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 // ========================================================================= //
 
-`include "common_defs.vh"
+`include "common_defs.svh"
 
-module tb (
+module {{module_name}} (
   input wire logic [{{w}} - 1:0]                 x_i
 , input wire logic [$clog2({{w}}) - 1:0]         pos_i
 
 //
 , output wire logic [{{w}} - 1:0]                x_o
-, output wire logic [$clog2({{w}} - 1):0]        pos_o
+, output wire logic [$clog2({{w}}) - 1:0]        pos_o
 , output wire logic                              any_o
 , output wire logic [{{w}} - 1:0]                y_o
 , output wire logic [$clog2({{w}}) - 1:0]        y_enc_o
@@ -59,7 +59,7 @@ logic [{{w}} - 1:0]             uut_y_o;
 logic [$clog2({{w}}) - 1:0]     uut_y_enc_o;
 
 logic                           out_any_r;
-logic [$clog2({{w}}) - 1:0]     out_pos_i;
+logic [$clog2({{w}}) - 1:0]     out_pos_r;
 logic [{{w}} - 1:0]             out_x_r;
 logic [{{w}} - 1:0]             out_y_r;
 logic [$clog2({{w}}) - 1:0]     out_y_enc_r;
@@ -71,9 +71,9 @@ logic [$clog2({{w}}) - 1:0]     out_y_enc_r;
 //========================================================================== //
 
 always_ff @(posedge clk) begin : in_reg_PROC
-  in_x_r <= i_x;
-  in_pos_r <= i_pos;
-wend : in_reg_PROC
+  in_x_r <= x_i;
+  in_pos_r <= pos_i;
+end : in_reg_PROC
 
 assign uut_x_i = in_x_r;
 assign uut_pos_i = in_pos_r;
@@ -88,7 +88,7 @@ assign uut_pos_i = in_pos_r;
 , .y_enc_o              (uut_y_enc_o)
 );
 
-always_ff @(posedge clk or negedge arst_n) : any_reg_PROC
+always_ff @(posedge clk or negedge arst_n) begin : any_reg_PROC
   if (~arst_n)
     out_any_r <= 1'b0;
   else
@@ -114,4 +114,4 @@ assign any_o = out_any_r;
 assign y_o = out_y_r;
 assign y_enc_o = out_y_enc_r;
 
-endmodule : tb
+endmodule : {{module_name}}
