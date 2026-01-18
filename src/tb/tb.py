@@ -26,12 +26,8 @@
 ## ========================================================================= ##
 
 import pathlib
-import shutil
-import jinja2
-import tempfile
 import os
-import cocotb
-
+import sys
 
 def _project_root(anchor: str = "README.md") -> pathlib.Path:
     def _recurse(path: pathlib.Path) -> pathlib.Path:
@@ -72,6 +68,13 @@ COMMON_FILES = [
 for i, f in enumerate(COMMON_FILES):
     COMMON_FILES[i] = PROJECT_ROOT / "rtl" / "common" / f
 
+TB_FILES = [
+    "tb.sv",
+]
+
+for i, f in enumerate(TB_FILES):
+    TB_FILES[i] = pathlib.Path(__file__).parent / f
+
 
 def compute_file_list(project: str) -> list[pathlib.Path]:
     if project not in PROJECTS:
@@ -80,91 +83,62 @@ def compute_file_list(project: str) -> list[pathlib.Path]:
     file_list = []
     file_list.extend(PROJECTS[project])
     file_list.extend(COMMON_FILES)
+    file_list.extend(TB_FILES)
     return file_list
 
 
 # All RTL include directories
-INCLUDES = [
-    PROJECT_ROOT / "rtl" / "common_defs.svh",
+INCLUDE_DIRS = [
+    PROJECT_ROOT / "rtl",
 ]
 
-WS = [8]
-
-
-def _render_tb(project: str, w: int) -> tuple[str, str]:
-    template_dir = os.path.dirname(__file__)
-    env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(template_dir),
-        trim_blocks=True,
-        lstrip_blocks=True,
-    )
-
-    template = env.get_template("tb.sv.tmpl")
-
-    module_name = f"tb_{project}_w_{w}"
-    rendered_tb = template.render(
-        w=w,
-        uut_name=project,
-        module_name=module_name,
-    )
-
-    return (module_name, rendered_tb)
-
-
-def render_rtl_sources(
-    project: str, w: int, dest_dir: pathlib.Path
-) -> list[pathlib.Path]:
-    rendered_fl = []
-
-    # Copy RTL sources
-    for src in compute_file_list(project):
-        dest = dest_dir / src.name
-        rendered_fl.append(dest)
-        shutil.copyfile(src, dest)
-
-    # Render and copy testbench
-    module_name, rendered_tb = _render_tb(project, w)
-
-    tb_path = dest_dir / f"{module_name}.sv"
-    rendered_fl.append(tb_path)
-    with open(tb_path, "w") as f:
-        f.write(rendered_tb)
-
-    # Copy include files
-    for inc in INCLUDES:
-        dest = dest_dir / inc.name
-        shutil.copyfile(inc, dest)
-
-    return (module_name, rendered_fl)
+WS = [16]
 
 
 def compile_and_run(
-    toplevel: str, rtl_files: list[pathlib.Path], root: pathlib.Path
+    project:str, w: int, sources: list[pathlib.Path]
 ) -> None:
     from cocotb_tools.runner import get_runner
 
+    def _escape_string(s: str) -> str:
+        return f"\"{s}\""
+
+    parameters = {
+        'W': w,
+        'P_UUT_NAME': _escape_string(project),
+    }
+
     runner = get_runner("verilator")
     runner.build(
-        sources=rtl_files, hdl_toplevel=toplevel, build_dir=str(root), waves=True
+        sources=sources, 
+        hdl_toplevel="tb", 
+        build_dir="./build", 
+        waves=True,
+        includes=INCLUDE_DIRS,
+        parameters=parameters,
+        build_args=["--trace", "--timing"]
     )
+
+    test_module = pathlib.Path(__file__).parent / "tests.py"
+
+    sys.path.insert(0, str(test_module.parent))
 
     runner.test(
-        hdl_toplevel=toplevel, test_dir=os.path.dirname(__file__), test_module="tests"
+        hdl_toplevel="tb", test_module="tests", waves=True
     )
 
-    if os.path.exists(root / "waves.vcd"):
-        print(f"Waveform generated at: {root / 'waves.vcd'}")
+    if os.path.exists("waves.vcd"):
+        print(f"Waveform generated at: waves.vcd")
     else:
         print("No waveform generated.")
 
 
 def run_testbench(project: str, w: int) -> bool:
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Copy all sources to a temporary directory and render top-level testbench
-        module_name, rtl_files = render_rtl_sources(project, w, pathlib.Path(tmpdir))
+    # Copy all sources to a temporary directory and render top-level testbench
+    hdl_files = compute_file_list(project)
 
-        # Compile and run the testbench using cocotb
-        compile_and_run(module_name, rtl_files, pathlib.Path(tmpdir))
+    # Compile and run the testbench using cocotb
+    compile_and_run(project, w, hdl_files)
 
     return True
 

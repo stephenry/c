@@ -28,11 +28,41 @@
 import cocotb
 
 from cocotb.clock import Clock
-from cocotb.triggers import Timer
+from cocotb.triggers import (Timer, RisingEdge)
 
+
+
+async def increment_signal(dut, max_value: int):
+    """Increment a signal value at specified intervals."""
+    while True:
+        await RisingEdge(dut.clk)
+        dut.x_i.value = (dut.x_i.value.to_unsigned() + 1) % max_value
 
 @cocotb.test()
 async def simple_testbench(dut):
-    Clock(dut.clk, 10, unit="ns").start()
 
-    await Timer(1000, unit="ns")
+    if dut.W.value != 16:
+        print(f"Testbench only supports W=16 for now (W={dut.W.value}).")
+        return
+    
+    dut.arst_n.value = 1
+    
+    test_cases = [
+        (0xffff, 0, 0x0001, 0, 1),
+        (0x0000, 0, 0x8000, 15, 1),
+        (0x0000, 1, 0x0001, 0, 1),
+        (0x0000, 15, 0x4000, 14, 1),
+        (0x2a37, 8, 0x0080, 7, 1),
+        (0xffff, 0, 0x0000, 0, 0),
+    ]
+
+    for test_case in test_cases:
+        dut.x_i.value = test_case[0]
+        dut.pos_i.value = test_case[1]
+        await RisingEdge(dut.clk)
+
+    for _ in range(5):
+        await RisingEdge(dut.clk)
+
+    dut._log.info("Test Completed Successfully")
+

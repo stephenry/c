@@ -27,18 +27,23 @@
 
 `include "common_defs.svh"
 
-module {{module_name}} (
-  input wire logic [{{w}} - 1:0]                 x_i
-, input wire logic [$clog2({{w}}) - 1:0]         pos_i
+module tb #(
+
+  parameter int W
+
+, parameter string P_UUT_NAME
+) (
+  input wire logic [W - 1:0]                     x_i
+, input wire logic [$clog2(W) - 1:0]             pos_i
 
 //
-, output wire logic [{{w}} - 1:0]                x_o
-, output wire logic [$clog2({{w}}) - 1:0]        pos_o
+, output wire logic [W - 1:0]                    x_o
+, output wire logic [$clog2(W) - 1:0]            pos_o
 , output wire logic                              any_o
-, output wire logic [{{w}} - 1:0]                y_o
-, output wire logic [$clog2({{w}}) - 1:0]        y_enc_o
+, output wire logic [W - 1:0]                    y_o
+, output wire logic [$clog2(W) - 1:0]            y_enc_o
 
-, input wire logic                               clk
+// , input wire logic                               clk
 , input wire logic                               arst_n
 );
 
@@ -48,27 +53,31 @@ module {{module_name}} (
 //                                                                           //
 //========================================================================== //
 
-logic [{{w}} - 1:0]             in_x_r;
-logic [$clog2({{w}}) - 1:0]     in_pos_r;
+logic [W - 1:0]                 in_x_r;
+logic [$clog2(W) - 1:0]         in_pos_r;
 
-logic [{{w}} - 1:0]             uut_x_i;
-logic [$clog2({{w}}) - 1:0]     uut_pos_i;
+logic [W - 1:0]                 uut_x_i;
+logic [$clog2(W) - 1:0]         uut_pos_i;
 
 logic                           uut_any_o;
-logic [{{w}} - 1:0]             uut_y_o;
-logic [$clog2({{w}}) - 1:0]     uut_y_enc_o;
+logic [W - 1:0]                 uut_y_o;
+logic [$clog2(W) - 1:0]         uut_y_enc_o;
 
 logic                           out_any_r;
-logic [$clog2({{w}}) - 1:0]     out_pos_r;
-logic [{{w}} - 1:0]             out_x_r;
-logic [{{w}} - 1:0]             out_y_r;
-logic [$clog2({{w}}) - 1:0]     out_y_enc_r;
+logic [$clog2(W) - 1:0]         out_pos_r;
+logic [W - 1:0]                 out_x_r;
+logic [W - 1:0]                 out_y_r;
+logic [$clog2(W) - 1:0]         out_y_enc_r;
 
 //========================================================================== //
 //                                                                           //
 // UUT                                                                       //
 //                                                                           //
 //========================================================================== //
+
+logic clk = 0;
+
+always #5 clk = ~clk;
 
 always_ff @(posedge clk) begin : in_reg_PROC
   in_x_r <= x_i;
@@ -78,15 +87,26 @@ end : in_reg_PROC
 assign uut_x_i = in_x_r;
 assign uut_pos_i = in_pos_r;
 
-{{uut_name}} #(.W({{w}})) u_uut (
-//
-  .x_i                  (uut_x_i)
-, .pos_i                (uut_pos_i)
-//
-, .any_o                (uut_any_o)
-, .y_o                  (uut_y_o)
-, .y_enc_o              (uut_y_enc_o)
-);
+generate begin : uut_GEN
+  if (P_UUT_NAME == "s") begin : s_GEN
+  
+    s #(.W(W)) u_uut (
+    //
+      .x_i                  (uut_x_i)
+    , .pos_i                (uut_pos_i)
+    //
+    , .any_o                (uut_any_o)
+    , .y_o                  (uut_y_o)
+    , .y_enc_o              (uut_y_enc_o));
+  end else begin : invalid_uut_name_GEN
+    initial begin
+      $error("Invalid UUT name: %s", P_UUT_NAME);
+      $finish;
+    end
+  end
+
+end : uut_GEN
+endgenerate
 
 always_ff @(posedge clk or negedge arst_n) begin : any_reg_PROC
   if (~arst_n)
@@ -114,4 +134,4 @@ assign any_o = out_any_r;
 assign y_o = out_y_r;
 assign y_enc_o = out_y_enc_r;
 
-endmodule : {{module_name}}
+endmodule : tb
