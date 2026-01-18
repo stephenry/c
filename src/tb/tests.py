@@ -30,6 +30,7 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer
 
+
 @cocotb.test()
 async def simple_testbench(dut):
     Clock(dut.clk, 10, unit="ns").start()

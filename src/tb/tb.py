@@ -32,6 +32,7 @@ import tempfile
 import os
 import cocotb
 
+
 def _project_root(anchor: str = "README.md") -> pathlib.Path:
     def _recurse(path: pathlib.Path) -> pathlib.Path:
         if (path / anchor).exists():
@@ -115,16 +116,14 @@ def render_rtl_sources(
 ) -> list[pathlib.Path]:
     rendered_fl = []
 
-    # Copy RTL sources
+    # Copy RTL sources
     for src in compute_file_list(project):
         dest = dest_dir / src.name
         rendered_fl.append(dest)
         shutil.copyfile(src, dest)
 
-    # Render and copy testbench
-    module_name, rendered_tb = _render_tb(
-        project, w
-    )
+    # Render and copy testbench
+    module_name, rendered_tb = _render_tb(project, w)
 
     tb_path = dest_dir / f"{module_name}.sv"
     rendered_fl.append(tb_path)
@@ -138,33 +137,34 @@ def render_rtl_sources(
 
     return (module_name, rendered_fl)
 
-def compile_and_run(toplevel: str, rtl_files: list[pathlib.Path], root: pathlib.Path) -> None:
+
+def compile_and_run(
+    toplevel: str, rtl_files: list[pathlib.Path], root: pathlib.Path
+) -> None:
     from cocotb_tools.runner import get_runner
 
     runner = get_runner("verilator")
     runner.build(
-        sources=rtl_files,
-        hdl_toplevel=toplevel,
-        build_dir=str(root),
-        waves=True
+        sources=rtl_files, hdl_toplevel=toplevel, build_dir=str(root), waves=True
     )
 
     runner.test(
-        hdl_toplevel=toplevel, test_dir=os.path.dirname(__file__), test_module="tests")
-    
+        hdl_toplevel=toplevel, test_dir=os.path.dirname(__file__), test_module="tests"
+    )
+
     if os.path.exists(root / "waves.vcd"):
         print(f"Waveform generated at: {root / 'waves.vcd'}")
     else:
         print("No waveform generated.")
 
+
 def run_testbench(project: str, w: int) -> bool:
     with tempfile.TemporaryDirectory() as tmpdir:
-        # Copy all sources to a temporary directory and render top-level testbench
+        # Copy all sources to a temporary directory and render top-level testbench
         module_name, rtl_files = render_rtl_sources(project, w, pathlib.Path(tmpdir))
-        
-        # Compile and run the testbench using cocotb
-        compile_and_run(module_name, rtl_files, pathlib.Path(tmpdir))
 
+        # Compile and run the testbench using cocotb
+        compile_and_run(module_name, rtl_files, pathlib.Path(tmpdir))
 
     return True
 

@@ -38,6 +38,7 @@ def setup_environment():
     verilator = pathlib.Path(verilator_root) / "bin" / "verilator"
     os.environ["PATH"] += os.pathsep + str(verilator.parent)
 
+
 if __name__ == "__main__":
     try:
         setup_environment()
