@@ -29,74 +29,12 @@ import pathlib
 import os
 import sys
 
-
-def _project_root(anchor: str = "README.md") -> pathlib.Path:
-    def _recurse(path: pathlib.Path) -> pathlib.Path:
-        if (path / anchor).exists():
-            return path
-        elif path.anchor != "" and path == path.parent:
-            raise FileNotFoundError(
-                f"Could not find project root with anchor '{anchor}'"
-            )
-        else:
-            return _recurse(path.parent)
-
-    return _recurse(pathlib.Path(__file__).parent)
-
-
-# Project root directory
-PROJECT_ROOT: pathlib.Path = _project_root("README.md")
-
-# Specific RTL files for each project
-PROJECTS = {
-    "s": [
-        "s.sv",
-    ]
-}
-
-for project, files in PROJECTS.items():
-    PROJECTS[project] = [PROJECT_ROOT / "rtl" / project / f for f in files]
-
-# Common RTL files used across multiple projects
-COMMON_FILES = [
-    "enc.sv",
-    "inc.sv",
-    "maske.sv",
-    "mux.sv",
-    "rev.sv",
-]
-
-for i, f in enumerate(COMMON_FILES):
-    COMMON_FILES[i] = PROJECT_ROOT / "rtl" / "common" / f
-
-TB_FILES = [
-    "tb.sv",
-]
-
-for i, f in enumerate(TB_FILES):
-    TB_FILES[i] = pathlib.Path(__file__).parent / f
-
-
-def compute_file_list(project: str) -> list[pathlib.Path]:
-    if project not in PROJECTS:
-        raise ValueError(f"Unknown project '{project}'")
-
-    file_list = []
-    file_list.extend(PROJECTS[project])
-    file_list.extend(COMMON_FILES)
-    file_list.extend(TB_FILES)
-    return file_list
-
-
-# All RTL include directories
-INCLUDE_DIRS = [
-    PROJECT_ROOT / "rtl",
-]
-
 WS = [16]
 
 
-def compile_and_run(project: str, w: int, sources: list[pathlib.Path]) -> None:
+def compile_and_run(
+    project: str, w: int, sources: list[pathlib.Path], include_dirs: list[pathlib.Path]
+) -> None:
     from cocotb_tools.runner import get_runner
 
     def _escape_string(s: str) -> str:
@@ -107,13 +45,17 @@ def compile_and_run(project: str, w: int, sources: list[pathlib.Path]) -> None:
         "P_UUT_NAME": _escape_string(project),
     }
 
+    from .rtl import PROJECT_ROOT
+
+    build_dir = PROJECT_ROOT / "build" / f"{project}_w{w}"
+
     runner = get_runner("verilator")
     runner.build(
         sources=sources,
         hdl_toplevel="tb",
-        build_dir="./build",
+        build_dir=str(build_dir),
         waves=True,
-        includes=INCLUDE_DIRS,
+        includes=include_dirs,
         parameters=parameters,
         build_args=["--trace", "--timing"],
     )
@@ -124,23 +66,27 @@ def compile_and_run(project: str, w: int, sources: list[pathlib.Path]) -> None:
 
     runner.test(hdl_toplevel="tb", test_module="tests", waves=True)
 
-    if os.path.exists("waves.vcd"):
-        print(f"Waveform generated at: waves.vcd")
+    if os.path.exists(build_dir / "waves.vcd"):
+        print(f"Waveform generated at: {build_dir / 'waves.vcd'}")
     else:
         print("No waveform generated.")
 
 
 def run_testbench(project: str, w: int) -> bool:
+    from .rtl import compute_file_list
+
     # Copy all sources to a temporary directory and render top-level testbench
-    hdl_files = compute_file_list(project)
+    hdl_files, include_dirs = compute_file_list(project)
 
     # Compile and run the testbench using cocotb
-    compile_and_run(project, w, hdl_files)
+    compile_and_run(project, w, hdl_files, include_dirs)
 
     return True
 
 
 def main():
+    from .rtl import PROJECTS
+
     for project in PROJECTS.keys():
         for w in WS:
             print(f"Running testbench for project '{project}' with width {w}")
