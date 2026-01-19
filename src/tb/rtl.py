@@ -49,6 +49,9 @@ PROJECT_ROOT: pathlib.Path = _project_root("README.md")
 PROJECTS = {
     "s": [
         "s.sv",
+    ],
+    "r": [
+        "r.sv",
     ]
 }
 
@@ -62,6 +65,9 @@ COMMON_FILES = [
     "maske.sv",
     "mux.sv",
     "rev.sv",
+    "bs.sv",
+    "sel.sv",
+    "pri.sv",
 ]
 
 for i, f in enumerate(COMMON_FILES):
