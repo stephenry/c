@@ -98,7 +98,7 @@ logic [$clog2(W) - 1:0]                y_enc;
 //     0010_1100_1110_1001                                 // (1)
 //                       ^
 //
-assign shift_1 = W[$clog2(W):0] - pos_i;
+assign shift_1 = W[$clog2(W):0] - {1'b0, pos_i};
 
 bs #(.W(W)) u_bs_1 (
   .x_i             (x_i)
