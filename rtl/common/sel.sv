@@ -35,13 +35,13 @@ module sel #(
 ) (
 // -------------------------------------------------------------------------- //
 // Selection Vector
-  input wire logic [(N * W) - 1:0]               i_x
+  input wire logic [(N * W) - 1:0]               x_i
 //
-, input wire logic [N - 1:0]                     i_sel
+, input wire logic [N - 1:0]                     sel_i
 
 // -------------------------------------------------------------------------- //
 // Encoded output
-, output wire logic [W - 1:0]                    o_y
+, output wire logic [W - 1:0]                    y_o
 );
 
 // ========================================================================== //
@@ -62,12 +62,12 @@ logic [N - 1:0][W - 1:0]               grp;
 //
 for (genvar i = 0; i < N; i++) begin : bin_GEN
 
-assign grp[i] = i_x[(W * i) +: W];
+assign grp[i] = x_i[(W * i) +: W];
 
 end : bin_GEN
 
 // -------------------------------------------------------------------------- //
 //
-mux #(.N(N), .W(W)) u_idx_mux (.i_x(grp), .i_sel, .o_y);
+mux #(.N(N), .W(W)) u_idx_mux (.x_i(grp), .sel_i(sel_i), .y_o(y_o));
 
 endmodule : sel

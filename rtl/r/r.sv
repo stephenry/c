@@ -74,7 +74,7 @@ logic [$clog2(W):0]                    shift_1;
 logic [W - 1:0]                        res_2;
 logic [W - 1:0]                        res_3;
 logic [W - 1:0]                        res_4;
-logic [$clog2(W) - 1:0]                shift_4;
+logic [$clog2(W):0]                    shift_4;
 
 logic                                  any;
 logic [W - 1:0]                        y;
@@ -130,11 +130,11 @@ pri #(.W(W), .FROM_LSB(1'b0)) u_pri_3 (.i_x(res_2), .o_y(res_3));
 //
 // The 1-hot output indicates the first '0' succeeding pos_i.
 //
-assign shift_4 = pos_i;
+assign shift_4 = W[$clog2(W):0] - {1'b0, pos_i};
 
-bs #(.W(W) u_bs_1 (
+bs #(.W(W)) u_bs_4 (
   .x_i             (res_3)
-, .shift_i         (shift_4)
+, .shift_i         (shift_4[$clog2(W) - 1:0])
 , .is_arith_i      (1'b0)
 , .is_rotate_i     (1'b1)
 , .is_right_i      (1'b1)

@@ -32,8 +32,6 @@ module bs #(
   parameter int W
 // Width of Mux.
 , parameter int SHIFT_W = $clog2(W)
-// Allow synthesis inference
-, parameter bit INFER = 'b0
 ) (
 // -------------------------------------------------------------------------- //
 // Command
@@ -51,8 +49,6 @@ module bs #(
 , output wire logic [W - 1:0]                     y_o
 );
 
-if (!INFER) begin : infer_GEN
-
 // ========================================================================== //
 //                                                                            //
 //  Wires                                                                     //
@@ -65,9 +61,11 @@ localparam int ROUND_LSB = 0;
 
 logic                                       do_sign_extend;
 
-logic [SHIFT_W - 1:0][ROUND_MSB:ROUND_LSB]  round_l;
-logic [SHIFT_W - 1:0][ROUND_MSB:ROUND_LSB]  round_r;
-logic [SHIFT_W:0][ROUND_MSB:ROUND_LSB]      round;
+logic [ROUND_MSB:ROUND_LSB]                 round_l [SHIFT_W:0];
+logic [ROUND_MSB:ROUND_LSB]                 round_r [SHIFT_W:0];
+// verilator lint_off UNOPTFLAT
+logic [ROUND_MSB:ROUND_LSB]                 round   [SHIFT_W:0];
+// verilator lint_on UNOPTFLAT
 
 logic [2:0]                                 sel;
 logic [W - 1:0]                             y;
@@ -89,22 +87,26 @@ assign round[SHIFT_W] = { {W{do_sign_extend}}, x_i, {W{1'b0}} };
 //
 for (genvar sh = (SHIFT_W - 1); sh >= 0; sh--) begin : sh_GEN
 
-  for (genvar i = 0; i < (3 * W); i++) begin : bit_GEN
-
 localparam int STRIDE = (1 << sh);
 
-localparam int L_INDEX = (i + STRIDE);
-localparam int R_INDEX = (i - STRIDE);
+  for (genvar i = 0; i < (3 * W); i++) begin : bit_GEN
 
-assign round_l[sh][i] = (L_INDEX <= ROUND_MSB) & round[sh + 1][L_INDEX];
-assign round_r[sh][i] = (R_INDEX >= ROUND_LSB) & round[sh + 1][R_INDEX];
+localparam int L_INDEX = (i - STRIDE);
+localparam int R_INDEX = (i + STRIDE);
 
-assign round[sh][i] =
-  shift_i[sh] ? (is_right_i ? round_r : round_l) : round[sh + 1][i];
+assign round_l[sh + 1][i] = 
+  (L_INDEX >= ROUND_LSB) ? round[sh + 1][L_INDEX] : 1'b0;
+
+assign round_r[sh + 1][i] = 
+  (R_INDEX <= ROUND_MSB) ? round[sh + 1][R_INDEX] : 1'b0;
 
   end : bit_GEN
 
+assign round[sh] = shift_i[sh] ? 
+  (is_right_i ? round_r[sh + 1] : round_l[sh + 1]) : round[sh + 1];
+
 end : sh_GEN
+
 
 // Mux-Madness; "sel" is effectively a mux with 3, W-bit inputs. In this case
 // the "sel" can be non-onehot in the rotate-case to allow the wrapped state to
@@ -113,28 +115,7 @@ assign sel[2] = is_rotate_i & (~is_right_i);
 assign sel[1] = 'b1;
 assign sel[0] = is_rotate_i &   is_right_i;
 
-sel #(.W(W), .N(3)) u_sel(.x_i(round[0]), .i_sel(sel), .y_o(y));
-
-end : infer_GEN
-else begin : ninfer_GEN
-
-always_comb begin : shift_PROC
-
-  case ({is_arith_i, is_rotate_i, is_right_i}) inside
-    3'b000:  y = $unsigned(x_i)  << shift_i;
-    3'b001:  y = $unsigned(x_i)  >> shift_i;
-    3'b010:  y = $unsigned(x_i) <<< shift_i;
-    3'b011:  y = $unsigned(x_i) >>> shift_i;
-    3'b100:  y =   $signed(x_i)  << shift_i;
-    3'b101:  y =   $signed(x_i)  >> shift_i;
-    3'b110:  y =   $signed(x_i) <<< shift_i;
-    3'b111:  y =   $signed(x_i) >>> shift_i;
-    default: y = 'x;
-  endcase
-
-end : shift_PROC
-
-end : ninfer_GEN
+sel #(.W(W), .N(3)) u_sel(.x_i(round[0]), .sel_i(sel), .y_o(y));
 
 // ========================================================================== //
 //                                                                            //
