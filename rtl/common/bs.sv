@@ -87,7 +87,7 @@ assign round[SHIFT_W] = { {W{do_sign_extend}}, x_i, {W{1'b0}} };
 
 // -------------------------------------------------------------------------- //
 //
-for (genvar sh = (SHIFT_W - 1); sh >= 0; sh--) begin :sh_GEN
+for (genvar sh = (SHIFT_W - 1); sh >= 0; sh--) begin : sh_GEN
 
   for (genvar i = 0; i < (3 * W); i++) begin : bit_GEN
 
