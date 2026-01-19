@@ -50,7 +50,7 @@
 //
 //   1111_1111_1111_1111     x     xxxx_xxxx_xxxx_xxxx    x        0
 
-module s #(
+module r #(
   // Vector width
   parameter int W = 32
 ) (
@@ -170,4 +170,4 @@ assign any_o = any;
 assign y_o = y;
 assign y_enc_o = y_enc;
 
-endmodule : s
+endmodule : r
