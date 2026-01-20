@@ -26,6 +26,7 @@
 //========================================================================== //
 
 `include "common_defs.svh"
+`include "math_pkg.svh"
 
 // Circuit to compute the cicular left-most '0' in a vector 'x' for a
 // given position. 'any' flag indicates output validity.
@@ -53,6 +54,9 @@
 module e #(
   // Vector width
   parameter int W = 32
+
+  // Radix (In range: [4,8])
+, parameter int RADIX_N = 4
 ) (
   input wire logic [W - 1:0]                     x_i
 , input wire logic [$clog2(W) - 1:0]             pos_i
@@ -62,6 +66,15 @@ module e #(
 , output wire logic [$clog2(W) - 1:0]            y_enc_o
 , output wire logic                              any_o
 );
+
+// ========================================================================= //
+//                                                                           //
+// Localparams                                                               //
+//                                                                           //
+// ========================================================================= //
+
+localparam int GROUPS_N = math_pkg::div_ceil(W, RADIX_N);
+
 
 // ========================================================================= //
 //                                                                           //

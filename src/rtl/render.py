@@ -86,6 +86,7 @@ for i, f in enumerate(_COMMON_FILES):
 # All RTL include directories
 _INCLUDE_FILES = [
     _PROJECT_ROOT / "rtl" / "common_defs.svh",
+    _PROJECT_ROOT / "rtl" / "math_pkg.svh",
 ]
 
 _ABC_EXE = os.environ.get("ABC_EXE", None)
