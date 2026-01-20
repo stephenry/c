@@ -177,7 +177,7 @@ class PLARenderer:
             if not line:
                 continue
 
-            comments_removed.append(line.lstrip("//").lstrip())
+            comments_removed.append(line.lstrip("//!").lstrip())
 
         return re.sub(r"\\\n", "", "".join(comments_removed)).split("\n")
 
