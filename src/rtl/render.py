@@ -240,8 +240,9 @@ def _render_pass_abc(i: typing.TextIO, o: typing.TextIO) -> None:
     for line in i.readlines():
 
         if re.search(r"PLA_END", line):
-            in_pla_region = False
             out_render.extend(PLARenderer(pla_region).render())
+            in_pla_region = False
+            pla_region = list()
 
         elif in_pla_region:
             pla_region.append(line)
