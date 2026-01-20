@@ -95,7 +95,6 @@ class PLARenderer:
         self._pla_region = pla_region
 
     def render(self) -> list[str]:
-        print("Rendering PLA region...")
 
         for line in self._remove_encapsulation(self._pla_region):
             if line.startswith(".i"):

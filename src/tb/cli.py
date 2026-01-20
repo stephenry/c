@@ -38,15 +38,20 @@ def setup_environment():
     verilator = pathlib.Path(verilator_root) / "bin" / "verilator"
     os.environ["PATH"] += os.pathsep + str(verilator.parent)
 
+def main():
 
-if __name__ == "__main__":
     try:
         setup_environment()
 
         from .tb import main as tb_main
-
         tb_main()
+
         sys.exit(0)
+
     except EnvironmentError as e:
         print(f"Testbench failed with error: {e}")
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
