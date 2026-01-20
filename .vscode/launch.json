@@ -5,7 +5,7 @@
             "name": "Debug TB",
             "type": "debugpy",
             "request": "launch",
-            "module": "tb",
+            "module": "tb.cli",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/src",
             "justMyCode": false
