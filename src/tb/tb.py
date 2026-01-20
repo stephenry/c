@@ -28,8 +28,13 @@
 import pathlib
 import os
 import sys
+import rtl
 
 WS = [16]
+
+TB_FILES = [
+    pathlib.Path(__file__).parent / "tb.sv",
+]
 
 
 def compile_and_run(
@@ -45,9 +50,7 @@ def compile_and_run(
         "P_UUT_NAME": _escape_string(project),
     }
 
-    from .rtl import PROJECT_ROOT
-
-    build_dir = PROJECT_ROOT / "build" / f"{project}_w{w}"
+    build_dir = f"build_{project}_w{w}/tb"
 
     runner = get_runner("verilator")
     runner.build(
@@ -66,17 +69,15 @@ def compile_and_run(
 
     runner.test(hdl_toplevel="tb", test_module="tests", waves=True)
 
-    if os.path.exists(build_dir / "waves.vcd"):
-        print(f"Waveform generated at: {build_dir / 'waves.vcd'}")
-    else:
-        print("No waveform generated.")
-
 
 def run_testbench(project: str, w: int) -> bool:
-    from .rtl import compute_file_list
+    out_dir = f"build_{project}_w{w}/rtl"
 
     # Copy all sources to a temporary directory and render top-level testbench
-    hdl_files, include_dirs = compute_file_list(project)
+    hdl_files, include_dirs = rtl.render_rtl(project, pathlib.Path(out_dir))
+
+    # Add testbench to the HDL files
+    hdl_files.extend(TB_FILES)
 
     # Compile and run the testbench using cocotb
     compile_and_run(project, w, hdl_files, include_dirs)
@@ -85,9 +86,8 @@ def run_testbench(project: str, w: int) -> bool:
 
 
 def main():
-    from .rtl import PROJECTS
 
-    for project in PROJECTS.keys():
+    for project in rtl.ALL_PROJECTS:
         for w in WS:
             print(f"Running testbench for project '{project}' with width {w}")
             success = run_testbench(project, w=w)

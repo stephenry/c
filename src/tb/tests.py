@@ -28,7 +28,7 @@
 import cocotb
 
 from cocotb.clock import Clock
-from cocotb.triggers import (Timer, RisingEdge, FallingEdge)
+from cocotb.triggers import Timer, RisingEdge, FallingEdge
 
 
 async def reset_sequence(dut, cycles_n: int) -> None:
@@ -62,7 +62,9 @@ async def validate_output(dut, expected_outputs) -> None:
         mismatchs = []
 
         if bool(dut.any_o.value) != any:
-            mismatchs.append(f"Output any_o mismatch: expected {any}, got {bool(dut.any_o.value)}")
+            mismatchs.append(
+                f"Output any_o mismatch: expected {any}, got {bool(dut.any_o.value)}"
+            )
 
         if any:
 
@@ -74,7 +76,7 @@ async def validate_output(dut, expected_outputs) -> None:
 
             if dut.y_enc_o.value.to_unsigned() != y_enc:
                 mismatchs.append(
-                    f"Output y_enc_o mismatch: expected {y_enc}, " 
+                    f"Output y_enc_o mismatch: expected {y_enc}, "
                     f"got {dut.y_enc_o.value.to_unsigned()}"
                 )
 
@@ -82,7 +84,9 @@ async def validate_output(dut, expected_outputs) -> None:
             break
 
     if mismatchs:
-        error_msg = "Validation failed with the following mismatches:\n" + "\n".join(mismatchs)
+        error_msg = "Validation failed with the following mismatches:\n" + "\n".join(
+            mismatchs
+        )
         dut._log.error(error_msg)
         for _ in range(5):
             await FallingEdge(dut.clk)

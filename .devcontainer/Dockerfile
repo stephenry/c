@@ -43,6 +43,15 @@ RUN apt-get update \
 # Switch to vscode user
 WORKDIR /tools
 
+# Build ABC
+WORKDIR /tools
+RUN git clone https://github.com/berkeley-abc/abc.git \
+ && cd abc \
+ && make -j8
+
+ENV ABC_ROOT=/tools/abc
+ENV ABC_EXE=${ABC_ROOT}/abc
+
 # Install poetry
 RUN pip install poetry
 
