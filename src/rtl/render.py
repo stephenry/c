@@ -57,6 +57,10 @@ _PROJECTS = {
     "r": [
         "r.sv",
     ],
+    "e": [
+        "e.sv",
+        "e_cell.sv",
+    ],
 }
 
 for project, files in _PROJECTS.items():
