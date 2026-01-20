@@ -122,6 +122,18 @@ generate begin : uut_GEN
     , .y_enc_o              (uut_y_enc_o));
 
   end : s_GEN
+  else if (P_UUT_NAME == "e") begin : e_GEN
+  
+    e #(.W(W)) u_uut (
+    //
+      .x_i                  (uut_x_i)
+    , .pos_i                (uut_pos_i)
+    //
+    , .any_o                (uut_any_o)
+    , .y_o                  (uut_y_o)
+    , .y_enc_o              (uut_y_enc_o));
+
+  end : e_GEN
   else if (P_UUT_NAME == "r") begin : r_GEN
   
     r #(.W(W)) u_uut (

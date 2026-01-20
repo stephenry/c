@@ -30,7 +30,7 @@
 
 package math_pkg;
 
-function int div_ceil(int n, int d);
+function automatic int div_ceil(int n, int d);
   return (n + d - 1) / d;
 endfunction : div_ceil
 
