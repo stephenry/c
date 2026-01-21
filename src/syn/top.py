@@ -145,11 +145,11 @@ def render_top(
     else:
         uut_parameters = ""
 
-    template = jinja2.Template(_TOP_SV)
-
     out_path = out_dir / "top.sv"
 
     with open(out_path, "w") as f:
+        template = jinja2.Template(_TOP_SV)
+
         f.write(template.render(
             module_name="top", uut=uut, uut_parameters=uut_parameters))
 
