@@ -142,6 +142,8 @@ def render_top(
     if uut_parameters:
         pl = ", ".join(f".{param[0]}({param[1]})" for param in uut_parameters)
         uut_parameters = f'#({pl})'
+    else:
+        uut_parameters = ""
 
     template = jinja2.Template(_TOP_SV)
 
