@@ -33,6 +33,7 @@ import tempfile
 
 
 def _project_root(anchor: str = "README.md") -> pathlib.Path:
+
     def _recurse(path: pathlib.Path) -> pathlib.Path:
         if (path / anchor).exists():
             return path

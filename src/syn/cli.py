@@ -25,34 +25,12 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ## ========================================================================= ##
 
-import sys
-import os
 import pathlib
 
-
-def setup_environment():
-    verilator_root = os.environ.get("VERILATOR_ROOT")
-    if verilator_root is None:
-        raise EnvironmentError("VERILATOR_ROOT environment variable is not set.")
-
-    verilator = pathlib.Path(verilator_root) / "bin" / "verilator"
-    os.environ["PATH"] += os.pathsep + str(verilator.parent)
-
-
 def main():
+    from .top import render_top
 
-    try:
-        setup_environment()
-
-        from .tb import main as tb_main
-
-        tb_main()
-
-        sys.exit(0)
-
-    except EnvironmentError as e:
-        print(f"Testbench failed with error: {e}")
-        sys.exit(1)
+    render_top(pathlib.Path("build_syn"), "s", uut_parameters=[("W", 16)])
 
 
 if __name__ == "__main__":

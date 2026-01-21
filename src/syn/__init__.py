@@ -24,36 +24,3 @@
 ## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ## POSSIBILITY OF SUCH DAMAGE.
 ## ========================================================================= ##
-
-import sys
-import os
-import pathlib
-
-
-def setup_environment():
-    verilator_root = os.environ.get("VERILATOR_ROOT")
-    if verilator_root is None:
-        raise EnvironmentError("VERILATOR_ROOT environment variable is not set.")
-
-    verilator = pathlib.Path(verilator_root) / "bin" / "verilator"
-    os.environ["PATH"] += os.pathsep + str(verilator.parent)
-
-
-def main():
-
-    try:
-        setup_environment()
-
-        from .tb import main as tb_main
-
-        tb_main()
-
-        sys.exit(0)
-
-    except EnvironmentError as e:
-        print(f"Testbench failed with error: {e}")
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
