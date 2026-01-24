@@ -31,24 +31,8 @@ import re
 import typing
 import tempfile
 
+from .env import PROJECT_ROOT
 
-def _project_root(anchor: str = "README.md") -> pathlib.Path:
-
-    def _recurse(path: pathlib.Path) -> pathlib.Path:
-        if (path / anchor).exists():
-            return path
-        elif path.anchor != "" and path == path.parent:
-            raise FileNotFoundError(
-                f"Could not find project root with anchor '{anchor}'"
-            )
-        else:
-            return _recurse(path.parent)
-
-    return _recurse(pathlib.Path(__file__).parent)
-
-
-# Project root directory
-_PROJECT_ROOT: pathlib.Path = _project_root("README.md")
 
 # Specific RTL files for each project
 _PROJECTS = {
@@ -65,7 +49,7 @@ _PROJECTS = {
 }
 
 for project, files in _PROJECTS.items():
-    _PROJECTS[project] = [_PROJECT_ROOT / "rtl" / project / f for f in files]
+    _PROJECTS[project] = [PROJECT_ROOT / "rtl" / project / f for f in files]
 
 ALL_PROJECTS = _PROJECTS.keys()
 
@@ -82,12 +66,12 @@ _COMMON_FILES = [
 ]
 
 for i, f in enumerate(_COMMON_FILES):
-    _COMMON_FILES[i] = _PROJECT_ROOT / "rtl" / "common" / f
+    _COMMON_FILES[i] = PROJECT_ROOT / "rtl" / "common" / f
 
 # All RTL include directories
 _INCLUDE_FILES = [
-    _PROJECT_ROOT / "rtl" / "common_defs.svh",
-    _PROJECT_ROOT / "rtl" / "math_pkg.svh",
+    PROJECT_ROOT / "rtl" / "common_defs.svh",
+    PROJECT_ROOT / "rtl" / "math_pkg.svh",
 ]
 
 _ABC_EXE = os.environ.get("ABC_EXE", None)
@@ -285,13 +269,13 @@ def _render_file_list(file_list: list[pathlib.Path], out_dir: pathlib.Path) -> N
 
 
 def render_rtl(
-    project: str, out_dir: pathlib.Path
+    design: str, out_dir: pathlib.Path
 ) -> tuple[list[pathlib.Path], list[pathlib.Path]]:
 
-    if project not in _PROJECTS:
-        raise ValueError(f"Unknown project '{project}'")
+    if design not in _PROJECTS:
+        raise ValueError(f"Unknown project '{design}'")
 
-    file_list = _compute_src_list(project)
+    file_list = _compute_src_list(design)
 
     _render_file_list(file_list, out_dir)
 

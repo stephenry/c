@@ -29,47 +29,42 @@ import os
 import pathlib
 from collections.abc import Generator
 from collections import defaultdict
-import rtl
+import common
 from typing import TypeAlias
 
-plist: TypeAlias = list[tuple[str, int | str]]
+plist: TypeAlias = dict[str, int | str]
 
 # Trials to run
 runlist = ["r", "s"]
 # runlist = rtl.ALL_PROJECTS
 
 # W_SWEEP = range(8, 128, 8)
-W_SWEEP = [16]
+W_SWEEP = [8, 16, 32, 48]
 
 RADIX_SWEEP = [4]
 
-F_SWEEP_MHZ = [10, 100]
+F_SWEEP_MHZ = [10, 30, 60, 100]
 # F_SWEEP_MHZ = range(10, 200, 20)
 
 BUILD_ROOT = pathlib.Path("build")
 
-PROJECT_ROOT = rtl._project_root("README.md")
-
-
-def _compute_rtl_dir(project: str, params: plist) -> pathlib.Path:
-    dir_name = project
-    for param, value in params:
+def _compute_dir(design: str, params: plist) -> pathlib.Path:
+    dir_name = design
+    for param, value in params.items():
         dir_name += f"_{param}{value}"
-    return BUILD_ROOT / dir_name / "rtl"
+    return (BUILD_ROOT / dir_name).resolve()
 
+def _compute_rtl_dir(design: str, params: plist) -> pathlib.Path:
+    return _compute_dir(design, params) / "rtl"
 
-def _compute_build_dir(project: str, params: plist) -> pathlib.Path:
-    dir_name = project
-    for param, value in params:
-        dir_name += f"_{param}{value}"
-    return BUILD_ROOT / dir_name / "syn"
-
+def _compute_build_dir(design: str, params: plist) -> pathlib.Path:
+    return _compute_dir(design, params) / "syn"
 
 def _width_parameterization():
 
     def _iterate_widths():
         for w in W_SWEEP:
-            yield [("W", w)]
+            yield dict([("W", w)])
 
     return _iterate_widths
 
@@ -79,7 +74,7 @@ def _width_and_radix_parameterization():
     def _iterate_widths_and_radix():
         for w in W_SWEEP:
             for r in RADIX_SWEEP:
-                yield [("W", w), ("RADIX_N", r)]
+                yield dict([("W", w), ("RADIX_N", r)])
 
     return _iterate_widths_and_radix
 
@@ -108,24 +103,22 @@ def compute_jobs() -> Generator[tuple[str, plist]]:
             yield (run_project, params)
 
 
-def run_job(project: str, params: plist, echo: bool = False) -> tuple[int, int, int]:
-    rtl_dir = _compute_rtl_dir(project, params)
+def run_job(design: str, params: plist, echo: bool = False) -> tuple[int, int, int]:
+    rtl_dir = _compute_rtl_dir(design, params)
 
     # Render RTL to destination directory.
-    import rtl
-
-    (filelist, includedirs) = rtl.render_rtl(project, rtl_dir)
+    (filelist, includedirs) = common.render_rtl(design, rtl_dir)
 
     # Render top-level file
     from .top import render_top
 
-    (top_path, top_module) = render_top(rtl_dir, project, params=params)
+    (top_path, top_module) = render_top(rtl_dir, design, params=params)
     filelist.append(top_path)
 
     try:
         from .yosys import SynligRunner
 
-        build_dir = _compute_build_dir(project, params)
+        build_dir = _compute_build_dir(design, params)
         os.makedirs(build_dir, exist_ok=True)
 
         syn_v = (build_dir / "top_syn.v").resolve()
@@ -193,18 +186,19 @@ def main(args: list[str] = None):
 
         def _canonical_run_name(project: str, params: plist) -> str:
             return f"{project}_" + "_".join(
-                f"{param}{value}" for param, value in params
+                f"{param}{value}" for param, value in params.items()
             )
 
         results[project].append({
             "name": _canonical_run_name(project, params),
-            "total_area": total_area,
+            "params": params,
+            "comb_area": (total_area - sequential_area),
             "sequential_area": sequential_area,
             "f_max_mhz": f_max,
         })
 
     from .plot import plot_results
-    plot_results(PROJECT_ROOT / "docs", results)
+    plot_results(common.PROJECT_ROOT / "docs" / "sweep.png", W_SWEEP, results)
 
 if __name__ == "__main__":
     main()

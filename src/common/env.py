@@ -25,9 +25,23 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ## ========================================================================= ##
 
-from .render import render_rtl, ALL_PROJECTS
+import pathlib
 
-__all__ = (
-    "render_rtl",
-    "ALL_PROJECTS",
-)
+
+def _project_root(anchor: str = "README.md") -> pathlib.Path:
+
+    def _recurse(path: pathlib.Path) -> pathlib.Path:
+        if (path / anchor).exists():
+            return path
+        elif path.anchor != "" and path == path.parent:
+            raise FileNotFoundError(
+                f"Could not find project root with anchor '{anchor}'"
+            )
+        else:
+            return _recurse(path.parent)
+
+    return _recurse(pathlib.Path(__file__).parent)
+
+
+# Project root directory
+PROJECT_ROOT: pathlib.Path = _project_root("README.md")

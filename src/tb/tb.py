@@ -28,7 +28,7 @@
 import pathlib
 import os
 import sys
-import rtl
+import common
 
 WS = [16]
 
@@ -74,7 +74,7 @@ def run_testbench(project: str, w: int) -> bool:
     out_dir = f"build_{project}_w{w}/rtl"
 
     # Copy all sources to a temporary directory and render top-level testbench
-    hdl_files, include_dirs = rtl.render_rtl(project, pathlib.Path(out_dir))
+    hdl_files, include_dirs = project.render_rtl(project, pathlib.Path(out_dir))
 
     # Add testbench to the HDL files
     hdl_files.extend(TB_FILES)
@@ -87,7 +87,7 @@ def run_testbench(project: str, w: int) -> bool:
 
 def main():
 
-    for project in rtl.ALL_PROJECTS:
+    for project in project.ALL_PROJECTS:
         for w in WS:
             print(f"Running testbench for project '{project}' with width {w}")
             success = run_testbench(project, w=w)

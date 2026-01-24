@@ -139,23 +139,16 @@ _TOP_MODULE = "top"
 
 
 def render_top(
-    out_dir: pathlib.Path, uut: str, params: None | list = None
+    out_dir: pathlib.Path, uut: str, params: None | dict = None
 ) -> tuple[pathlib.Path, str]:
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    def _extract_param(name: str) -> str:
-        for param in params:
-            if param[0] == name:
-                return str(param[1])
-        return None
-
-    W = _extract_param("W")
-    if W is None:
+    if "W" not in params:
         raise ValueError("Parameter W must be specified for top-level generation.")
 
     if params is not None:
-        pl = ", ".join(f".{param[0]}({param[1]})" for param in params)
+        pl = ", ".join(f".{k}({v})" for k, v in params.items())
         uut_parameters = f"#({pl})"
     else:
         uut_parameters = ""
@@ -171,7 +164,7 @@ def render_top(
                 module_name=_TOP_MODULE, 
                 uut=uut,
                 uut_parameters=uut_parameters,
-                W=W,
+                W=params["W"],
             )
         )
 
