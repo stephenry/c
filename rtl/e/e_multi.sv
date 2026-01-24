@@ -51,7 +51,7 @@
 //
 //   1111_1111_1111_1111     x     xxxx_xxxx_xxxx_xxxx    x        0
 
-module e #(
+module e_multi #(
   // Vector width
   parameter int W = 32
 
@@ -73,6 +73,18 @@ module e #(
 //                                                                           //
 // ========================================================================= //
 
+localparam int SEARCH_WORD_W = 2 * W;
+
+localparam int GROUPS_N = math_pkg::div_ceil(SEARCH_WORD_W, RADIX_N);
+
+typedef logic [GROUPS_N - 1:0]                     groups_t;
+typedef logic [GROUPS_N - 1:0][RADIX_N - 1:0]      groups_vec_t;
+
+localparam int GROUPS_VEC_W = $bits(groups_vec_t);
+
+// Flag indicating whether the groups require padding to fill the last group.
+localparam bit REQUIRES_PADDING = (GROUPS_N * RADIX_N != SEARCH_WORD_W);
+
 
 // ========================================================================= //
 //                                                                           //
@@ -80,6 +92,18 @@ module e #(
 //                                                                           //
 // ========================================================================= //
 
+logic [W - 1:0]                        pos_dec;
+
+groups_t                               groups_prior;
+groups_vec_t                           groups_sel;
+groups_vec_t                           groups_in;
+groups_vec_t                           groups_out;
+groups_t                               groups_out_vld;
+
+logic                                  any;
+
+logic [W - 1:0]                        y;
+logic [$clog2(W) - 1:0]                y_enc;
 
 // ========================================================================= //
 //                                                                           //
@@ -87,42 +111,83 @@ module e #(
 //                                                                           //
 // ========================================================================= //
 
-if (W < 2) begin: gen_lt_2_GEN
+// ------------------------------------------------------------------------- //
+// Compute selection vector.
+dec #(.W(W)) u_dec (
+  .x_i                       (pos_i)
+, .y_o                       (pos_dec)
+);
 
-// No priority encoder defined for W < 2
-initial begin
-  $error("E_MULTI: Unsupported vector width W=%0d; minimum is 2", W);
+// ------------------------------------------------------------------------- //
+// Compute input vector (padding if required).
+if (REQUIRES_PADDING) begin : gen_groups_padding
+  localparam int PADDING_BITS = (GROUPS_N * RADIX_N) - W;
+
+  assign groups_in = { {(PADDING_BITS{1'b0}}, x_i, x_i };
+  assign groups_sel = { {(PADDING_BITS{1'b0}}, pos_dec, pos_dec };
 end
+else begin : gen_groups_no_padding
 
-end: gen_lt_2_GEN
-else begin: no_multi_GEN
+  assign groups_in = { x_i, x_i };
+  assign groups_sel = { pos_dec, pos_dec };
+end : gen_groups_no_padding
 
-// 2 - 8: infer multi-level priority encoder
-e_priority #(.W(RADIX_N)) u_e_priority (
-  .x_prior_and_sel_i    (1'b0)
-, .x_i                  (x_i)
-, .pos_i                (pos_i)
+// ------------------------------------------------------------------------- //
+// Groups prior:
+for (genvar i = 0; i < GROUPS_N; i++) begin : group_prior_GEN
+
+if (i == (GROUPS_N - 1)) begin: last_group_GEN
+
+  assign groups_prior[i] = 1'b0;
+end: last_group_GEN
+else begin: not_last_group_GEN
+  localparam int j = (i * RADIX_N);
+
+  assign groups_prior[i] = (groups_in[j] & groups_sel[j]);
+end: not_last_group_GEN
+
+end : group_prior_GEN
+
+// ------------------------------------------------------------------------- //
 //
-, .y_o                  (y)
-, .y_enc_o              (y_enc)
-, .any_o                (any)
-);
+for (genvar i = 0; i < GROUPS_N; i++) begin : group_GEN
 
-end: no_multi_GEN
-else begin: multi_GEN
+  e_priority #(.W(RADIX_N)) u_e_priority (
+    .x_prior_and_sel_i       (groups_prior[i])
+  , .x_i                     (groups_in[i])
+  , .sel_i                   (groups_sel[i])
+  , .vld_o                   (groups_out_vld[i])
+  , .y_o                     (groups_out[i]));
 
-// > 8: use multi-level priority encoder
-e_multi #(.W(W), .RADIX_N(RADIX_N)) u_e_multi (
-  .x_i                  (x_i)
-, .pos_i                (pos_i)
+end : group_GEN
+
+// ------------------------------------------------------------------------- //
 //
-, .y_o                  (y)
-, .y_enc_o              (y_enc)
-, .any_o                (any)
-);
+for (genvar i = 0; i < GROUPS_N; i++) begin: group_cell_GEN
 
-end: multi_GEN
+if (i == (GROUPS_N - 1)) begin: last_group_cell_GEN
 
+  e_multi_cell u_e_multi_cell (
+    .vld_i                    (groups_out_vld[i])
+  , .prior_i                  (1'b0)
+  , .sel_i                    (groups_sel[(i * RADIX_N) +: RADIX_N])
+  //
+  , .next_o                   ()
+  );
+
+  end: last_group_cell_GEN
+
+else begin: not_last_group_cell_GEN
+
+  e_multi_cell u_e_multi_cell (
+    .vld_i                    (groups_out_vld[i])
+  , .prior_i                  (1'b0)
+  , .sel_i                    (groups_sel[(i * RADIX_N) +: RADIX_N])
+  //
+  , .next_o                   ()
+  );
+
+end: group_cell_GEN
 
 // ------------------------------------------------------------------------- //
 // If no bit is found in the bits preceeding pos_i, use the output
@@ -153,4 +218,4 @@ assign any_o = any;
 assign y_o = y;
 assign y_enc_o = y_enc;
 
-endmodule : e
+endmodule : e_multi

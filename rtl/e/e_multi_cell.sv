@@ -27,12 +27,15 @@
 
 `include "common_defs.svh"
 
-module e_cell (
+module e_multi_cell #(
+  parameter int RADIX_N = 4
+)(
   input wire logic                               vld_i
 , input wire logic                               prior_i
+, input wire logic [RADIX_N - 1:0]               sel_i
 //
 , output wire logic                              next_o
 );
 
 
-endmodule : e_cell
+endmodule : e_multi_cell

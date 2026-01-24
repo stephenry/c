@@ -44,7 +44,8 @@ _PROJECTS = {
     ],
     "e": [
         "e.sv",
-        "e_cell.sv",
+        "e_multi.sv",
+        "e_multi_cell.sv",
         "e_priority.sv",
     ],
 }
