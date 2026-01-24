@@ -53,6 +53,9 @@
 module r #(
   // Vector width
   parameter int W = 32
+
+// Infer shifter/rotator
+, parameter bit INFER = 1'b0
 ) (
   input wire logic [W - 1:0]                     x_i
 , input wire logic [$clog2(W) - 1:0]             pos_i
@@ -100,14 +103,27 @@ logic [$clog2(W) - 1:0]                y_enc;
 //
 assign shift_1 = W[$clog2(W):0] - {1'b0, pos_i};
 
-bs #(.W(W)) u_bs_1 (
-  .x_i             (x_i)
-, .shift_i         (shift_1[$clog2(W) - 1:0])
-, .is_arith_i      (1'b0)
-, .is_rotate_i     (1'b1)
-, .is_right_i      (1'b0)
-, .y_o             (res_1)
+if (INFER) begin : gen_infer_bs
+
+  // Use inferred shifter/rotator.
+  bsi #(.W(W), .P_ARITH(1'b0), .P_ROTATE(1'b1), .P_RIGHT(1'b0)) u_bsi_1 (
+    .x_i             (x_i)
+  , .shift_i         (shift_1[$clog2(W) - 1:0])
+  , .y_o             (res_1)
+  );
+end
+else begin : gen_explicit_bs
+
+  // Use explicit shifter/rotator.
+  bs #(.W(W)) u_bs_1 (
+    .x_i             (x_i)
+  , .shift_i         (shift_1[$clog2(W) - 1:0])
+  , .is_arith_i      (1'b0)
+  , .is_rotate_i     (1'b1)
+  , .is_right_i      (1'b0)
+  , .y_o             (res_1)
 );
+end : gen_explicit_bs
 
 // Invert bits.
 //
@@ -132,14 +148,26 @@ pri #(.W(W), .FROM_LSB(1'b0)) u_pri_3 (.i_x(res_2), .o_y(res_3));
 //
 assign shift_4 = W[$clog2(W):0] - {1'b0, pos_i};
 
-bs #(.W(W)) u_bs_4 (
-  .x_i             (res_3)
-, .shift_i         (shift_4[$clog2(W) - 1:0])
-, .is_arith_i      (1'b0)
-, .is_rotate_i     (1'b1)
-, .is_right_i      (1'b1)
-, .y_o             (res_4)
-);
+if (INFER) begin : gen_infer_bs_4
+
+  // Use inferred shifter/rotator.
+  bsi #(.W(W), .P_ARITH(1'b0), .P_ROTATE(1'b1), .P_RIGHT(1'b1)) u_bsi_4 (
+    .x_i             (res_3)
+  , .shift_i         (shift_4[$clog2(W) - 1:0])
+  , .y_o             (res_4));
+end
+else begin : gen_explicit_bs_4
+
+  // Use explicit shifter/rotator.
+  bs #(.W(W)) u_bs_4 (
+    .x_i             (res_3)
+  , .shift_i         (shift_4[$clog2(W) - 1:0])
+  , .is_arith_i      (1'b0)
+  , .is_rotate_i     (1'b1)
+  , .is_right_i      (1'b1)
+  , .y_o             (res_4));
+end : gen_explicit_bs_4
+
 
 // ------------------------------------------------------------------------- //
 // If no bit is found in the bits preceeding pos_i, use the output

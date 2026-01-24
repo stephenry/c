@@ -63,6 +63,7 @@ _COMMON_FILES = [
     "mux.sv",
     "rev.sv",
     "bs.sv",
+    "bsi.sv",
     "sel.sv",
     "pri.sv",
     "dec.sv",
