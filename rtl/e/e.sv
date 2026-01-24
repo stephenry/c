@@ -73,7 +73,17 @@ module e #(
 //                                                                           //
 // ========================================================================= //
 
-localparam int GROUPS_N = math_pkg::div_ceil(W, RADIX_N);
+localparam int SEARCH_WORD_W = 2 * W;
+
+localparam int GROUPS_N = math_pkg::div_ceil(SEARCH_WORD_W, RADIX_N);
+
+typedef logic [GROUPS_N - 1:0]                     groups_t;
+typedef logic [GROUPS_N - 1:0][RADIX_N - 1:0]      groups_vec_t;
+
+localparam int GROUPS_VEC_W = $bits(groups_vec_t);
+
+// Flag indicating whether the groups require padding to fill the last group.
+localparam bit REQUIRES_PADDING = (GROUPS_N * RADIX_N != SEARCH_WORD_W);
 
 
 // ========================================================================= //
@@ -82,11 +92,119 @@ localparam int GROUPS_N = math_pkg::div_ceil(W, RADIX_N);
 //                                                                           //
 // ========================================================================= //
 
+logic [W - 1:0]                        pos_dec;
+
+groups_t                               groups_prior;
+groups_vec_t                           groups_sel;
+groups_vec_t                           groups_in;
+groups_vec_t                           groups_out;
+groups_t                               groups_out_vld;
+
+logic                                  any;
+
+logic [W - 1:0]                        y;
+logic [$clog2(W) - 1:0]                y_enc;
+
 // ========================================================================= //
 //                                                                           //
 // Logic.                                                                    //
 //                                                                           //
 // ========================================================================= //
+
+// ------------------------------------------------------------------------- //
+// Compute selection vector.
+dec #(.W(W)) u_dec (
+  .x_i                       (pos_i)
+, .y_o                       (pos_dec)
+);
+
+// ------------------------------------------------------------------------- //
+// Compute input vector (padding if required).
+if (REQUIRES_PADDING) begin : gen_groups_padding
+  localparam int PADDING_BITS = (GROUPS_N * RADIX_N) - W;
+
+  assign groups_in = { {(PADDING_BITS{1'b0}}, x_i, x_i };
+  assign groups_sel = { {(PADDING_BITS{1'b0}}, pos_dec, pos_dec };
+end
+else begin : gen_groups_no_padding
+
+  assign groups_in = { x_i, x_i };
+  assign groups_sel = { pos_dec, pos_dec };
+end : gen_groups_no_padding
+
+// ------------------------------------------------------------------------- //
+// Groups prior:
+for (genvar i = 0; i < GROUPS_N; i++) begin : group_prior_GEN
+
+if (i == (GROUPS_N - 1)) begin: last_group_GEN
+
+  assign groups_prior[i] = 1'b0;
+end: last_group_GEN
+else begin: not_last_group_GEN
+  localparam int j = (i * RADIX_N);
+
+  assign groups_prior[i] = (groups_in[j] & groups_sel[j]);
+end: not_last_group_GEN
+
+end : group_prior_GEN
+
+// ------------------------------------------------------------------------- //
+//
+for (genvar i = 0; i < GROUPS_N; i++) begin : group_GEN
+
+  e_priority #(.W(RADIX_N)) u_e_priority (
+    .x_prior_and_sel_i       (groups_prior[i])
+  , .x_i                     (groups_in[i])
+  , .sel_i                   (groups_sel[i])
+  , .vld_o                   (groups_out_vld[i])
+  , .y_o                     (groups_out[i]));
+
+end : group_GEN
+
+// ------------------------------------------------------------------------- //
+//
+for (genvar i = 0; i < GROUPS_N; i++) begin: group_cell_GEN
+
+if (i == (GROUPS_N - 1)) begin: last_group_cell_GEN
+
+  e_cell u_e_cell (
+    .vld_i                    (groups_out_vld[i])
+  , .prior_i                  (1'b0)
+  //
+  , .next_o                   ()
+  );
+
+  end: last_group_cell_GEN
+
+else begin: not_last_group_cell_GEN
+
+  e_cell u_e_cell (
+    .vld_i                    (groups_out_vld[i])
+  , .prior_i                  ()
+  //
+  , .next_o                   ()
+  );
+
+end: group_cell_GEN
+
+// ------------------------------------------------------------------------- //
+// If no bit is found in the bits preceeding pos_i, use the output
+// from the succeeding bits logic.
+//
+assign y = '0;
+
+
+// ------------------------------------------------------------------------- //
+// 'Any' flag; indicate that a 'b0 is present in the input vector. The
+// output at y_* is therefore valid.
+// 
+assign any = (x_i != '1);
+
+
+// ------------------------------------------------------------------------- //
+// Compute encoded output.
+enc #(.W(W)) u_enc (.x_i(y), .y_o(y_enc));
+
 
 // ========================================================================= //
 //                                                                           //
@@ -94,5 +212,8 @@ localparam int GROUPS_N = math_pkg::div_ceil(W, RADIX_N);
 //                                                                           //
 // ========================================================================= //
 
+assign any_o = any;
+assign y_o = y;
+assign y_enc_o = y_enc;
 
 endmodule : e

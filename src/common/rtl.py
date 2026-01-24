@@ -45,6 +45,7 @@ _PROJECTS = {
     "e": [
         "e.sv",
         "e_cell.sv",
+        "e_priority.sv",
     ],
 }
 
@@ -63,6 +64,7 @@ _COMMON_FILES = [
     "bs.sv",
     "sel.sv",
     "pri.sv",
+    "dec.sv",
 ]
 
 for i, f in enumerate(_COMMON_FILES):

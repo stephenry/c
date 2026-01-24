@@ -4,11 +4,17 @@
 
 ## Realizations
 
-#### (E) [e.sv](./rtl/e/e.sv)
+#### (E) [e.sv](./rtl/e/e.sv):
 
-#### (R) [r.sv](./rtl/s/s.sv)
+TBD
 
-#### (S) [s.sv](./rtl/s/s.sv)
+#### (R) [r.sv](./rtl/s/s.sv):
+
+TBD
+
+#### (S) [s.sv](./rtl/s/s.sv):
+
+TBD
 
 
 ## Physical Analysis
