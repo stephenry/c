@@ -34,7 +34,7 @@
 
 module inc #(
   // Width of word
-  parameter int W
+  parameter int W = 32
 ) (
 // -------------------------------------------------------------------------- //
 // Decoded input

@@ -29,11 +29,11 @@
 
 module maske #(
   // Width of encoded input
-  parameter int W
+  parameter int W = 32
 
-, parameter bit P_INCLUSIVE
+, parameter bit P_INCLUSIVE = 1'b0
 
-, parameter bit LEFT_NOT_RIGHT
+, parameter bit LEFT_NOT_RIGHT = 1'b0
 ) (
 // -------------------------------------------------------------------------- //
 // Decoded input

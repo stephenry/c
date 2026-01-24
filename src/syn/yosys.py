@@ -65,6 +65,8 @@ class SynligRunner:
         ec, stdout = self._run_synlig()
         if self._echo:
             print(stdout)
+        if ec:
+            raise RuntimeError("Synlig synthesis failed.")
         self._total_area, self._sequential_area = self._scan_synlig_output(stdout)
 
     def area(self) -> tuple[float, float]:

@@ -28,13 +28,14 @@
 import os
 import pathlib
 from collections.abc import Generator
+from collections import defaultdict
 import rtl
 from typing import TypeAlias
 
 plist: TypeAlias = list[tuple[str, int | str]]
 
 # Trials to run
-runlist = ["s"]
+runlist = ["r", "s"]
 # runlist = rtl.ALL_PROJECTS
 
 # W_SWEEP = range(8, 128, 8)
@@ -42,10 +43,12 @@ W_SWEEP = [16]
 
 RADIX_SWEEP = [4]
 
-F_SWEEP_MHZ = [100]
+F_SWEEP_MHZ = [10, 100]
 # F_SWEEP_MHZ = range(10, 200, 20)
 
 BUILD_ROOT = pathlib.Path("build")
+
+PROJECT_ROOT = rtl._project_root("README.md")
 
 
 def _compute_rtl_dir(project: str, params: plist) -> pathlib.Path:
@@ -142,6 +145,7 @@ def run_job(project: str, params: plist, echo: bool = False) -> tuple[int, int, 
         # Run timing on top-level
         from .sta import OpenSTARunner
 
+        f_max = None
         for f_mhz in reversed(F_SWEEP_MHZ):
             sta = OpenSTARunner(
                 path=build_dir,
@@ -178,6 +182,8 @@ def main(args: list[str] = None):
         print(f"Environment setup error: {e}")
         return
 
+    results = defaultdict(list)
+
     for job in compute_jobs():
         (project, params) = job
         print(f"Running job: project={project}, params={params}")
@@ -185,6 +191,20 @@ def main(args: list[str] = None):
         # Run synthesis and STA on current parameterization
         (total_area, sequential_area, f_max) = run_job(project, params)
 
+        def _canonical_run_name(project: str, params: plist) -> str:
+            return f"{project}_" + "_".join(
+                f"{param}{value}" for param, value in params
+            )
+
+        results[project].append({
+            "name": _canonical_run_name(project, params),
+            "total_area": total_area,
+            "sequential_area": sequential_area,
+            "f_max_mhz": f_max,
+        })
+
+    from .plot import plot_results
+    plot_results(PROJECT_ROOT / "docs", results)
 
 if __name__ == "__main__":
     main()

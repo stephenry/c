@@ -29,7 +29,7 @@
 
 module rev #(
   // Width of encoded input
-  parameter int W
+  parameter int W = 32
 ) (
 // -------------------------------------------------------------------------- //
 // Decoded input

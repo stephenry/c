@@ -90,7 +90,6 @@ class OpenSTARunner:
                 f"link_design {self._top}",
                 f"read_sdc {self._sdc_file}",
                 f"report_checks",
-                f"exit",
             ]
             f.write("\n".join(cmds) + "\n")
 
@@ -98,7 +97,7 @@ class OpenSTARunner:
         from subprocess import Popen, PIPE
 
         p = Popen(
-            [OPENSTA_EXECUTABLE, self._opensta_file],
+            [OPENSTA_EXECUTABLE, "-exit", self._opensta_file],
             stdout=PIPE,
             stderr=PIPE,
             cwd=self._path,
