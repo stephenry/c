@@ -56,13 +56,16 @@ _TOP_SV = """\
 `include "common_defs.svh"
 
 module {{module_name}} (
-  input wire logic [W - 1:0]                     x_i
-, input wire logic [$clog2(W) - 1:0]             pos_i
+
+  input wire logic [{{W}} - 1:0]                 x_i
+, input wire logic [$clog2({{W}}) - 1:0]         pos_i
+
 //
 , output wire logic                              any_o
-, output wire logic [W - 1:0]                    y_o
-, output wire logic [$clog2(W) - 1:0]            y_enc_o
+, output wire logic [{{W}} - 1:0]                y_o
+, output wire logic [$clog2({{W}}) - 1:0]        y_enc_o
 
+//
 , input wire logic                               clk
 );
 
@@ -72,16 +75,16 @@ module {{module_name}} (
 //                                                                           //
 //========================================================================== //
 
-logic [W - 1:0]                 in_x_r;
-logic [$clog2(W) - 1:0]         in_pos_r;
+logic [{{W}} - 1:0]             in_x_r;
+logic [$clog2({{W}}) - 1:0]     in_pos_r;
 
 logic                           uut_any_o;
-logic [W - 1:0]                 uut_y_o;
-logic [$clog2(W) - 1:0]         uut_y_enc_o;
+logic [{{W}} - 1:0]             uut_y_o;
+logic [$clog2({{W}}) - 1:0]     uut_y_enc_o;
 
 logic                           out_any_r;
-logic [W - 1:0]                 out_y_r;
-logic [$clog2(W) - 1:0]         out_y_enc_r;
+logic [{{W}} - 1:0]             out_y_r;
+logic [$clog2({{W}}) - 1:0]     out_y_enc_r;
 
 //========================================================================== //
 //                                                                           //
@@ -132,25 +135,44 @@ endmodule : {{module_name}}
 import pathlib
 import jinja2
 
+_TOP_MODULE = "top"
+
 
 def render_top(
-    out_dir: pathlib.Path, uut: str, uut_parameters: None | list = None
-) -> pathlib.Path:
+    out_dir: pathlib.Path, uut: str, params: None | list = None
+) -> tuple[pathlib.Path, str]:
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    if uut_parameters:
-        pl = ", ".join(f".{param[0]}({param[1]})" for param in uut_parameters)
-        uut_parameters = f'#({pl})'
+    def _extract_param(name: str) -> str:
+        for param in params:
+            if param[0] == name:
+                return str(param[1])
+        return None
+
+    W = _extract_param("W")
+    if W is None:
+        raise ValueError("Parameter W must be specified for top-level generation.")
+
+    if params is not None:
+        pl = ", ".join(f".{param[0]}({param[1]})" for param in params)
+        uut_parameters = f"#({pl})"
     else:
         uut_parameters = ""
 
-    out_path = out_dir / "top.sv"
+    template = jinja2.Template(_TOP_SV)
+
+    top_filename = f"{_TOP_MODULE}.sv"
+    out_path = out_dir / top_filename
 
     with open(out_path, "w") as f:
-        template = jinja2.Template(_TOP_SV)
+        f.write(
+            template.render(
+                module_name=_TOP_MODULE, 
+                uut=uut,
+                uut_parameters=uut_parameters,
+                W=W,
+            )
+        )
 
-        f.write(template.render(
-            module_name="top", uut=uut, uut_parameters=uut_parameters))
-
-    return out_path
+    return out_path.resolve(), _TOP_MODULE

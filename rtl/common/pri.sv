@@ -29,7 +29,7 @@
 
 module pri #(
   // Width of vector
-  parameter int W
+  parameter int W = 32
   // Priority direction (MSB vs. LSB)
 , parameter bit FROM_LSB = 'b0
 ) (

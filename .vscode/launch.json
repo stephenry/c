@@ -7,8 +7,15 @@
             "request": "launch",
             "module": "tb.cli",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/src",
-            "justMyCode": false
+            "cwd": "${workspaceFolder}/src"
+        },
+        {
+            "name": "Debug Syn",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "syn.cli",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src"
         }
     ]
 }

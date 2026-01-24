@@ -228,7 +228,6 @@ def _compute_src_list(project: str) -> list[pathlib.Path]:
     file_list = []
     file_list.extend(_PROJECTS[project])
     file_list.extend(_COMMON_FILES)
-    file_list.extend(_INCLUDE_FILES)
 
     return file_list
 
@@ -296,4 +295,10 @@ def render_rtl(
 
     _render_file_list(file_list, out_dir)
 
-    return (file_list, [out_dir])
+    include_dirs = set()
+    include_dirs.add(out_dir)
+    include_dirs.update(
+        os.path.dirname(file) for file in _INCLUDE_FILES
+    )
+
+    return (file_list, list(include_dirs))

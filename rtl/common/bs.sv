@@ -29,7 +29,7 @@
 
 module bs #(
 // Width
-  parameter int W
+  parameter int W = 32
 // Width of Mux.
 , parameter int SHIFT_W = $clog2(W)
 ) (
