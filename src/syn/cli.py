@@ -35,7 +35,7 @@ from typing import TypeAlias
 plist: TypeAlias = dict[str, int | str]
 
 # Trials to run
-runlist = ["r", "s"]
+runlist = ["e", "r", "s"]
 # runlist = rtl.ALL_PROJECTS
 
 # W_SWEEP = range(8, 128, 8)

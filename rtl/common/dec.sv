@@ -29,7 +29,7 @@
 
 module dec #(
   // Width of encoded input
-  parameter int W
+  parameter int W = 32
 
 , parameter int OUT_W = W
 ) (
