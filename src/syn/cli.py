@@ -38,13 +38,13 @@ plist: TypeAlias = dict[str, int | str]
 runlist = ["n", "e", "r", "s"]
 # runlist = rtl.ALL_PROJECTS
 
-# W_SWEEP = range(8, 128, 8)
-W_SWEEP = [8, 16, 32, 48]
+W_SWEEP = range(8, 64, 8)
+# W_SWEEP = [8, 16, 32, 48]
 
 RADIX_SWEEP = [4]
 
-F_SWEEP_MHZ = [10, 30, 60, 100]
-# F_SWEEP_MHZ = range(10, 200, 20)
+# F_SWEEP_MHZ = [10, 30, 60, 100]
+F_SWEEP_MHZ = range(10, 200, 20)
 
 BUILD_ROOT = pathlib.Path("build")
 
