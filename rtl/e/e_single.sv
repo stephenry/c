@@ -51,12 +51,9 @@
 //
 //   1111_1111_1111_1111     x     xxxx_xxxx_xxxx_xxxx    x        0
 
-module e #(
+module e_single #(
   // Vector width
   parameter int W = 32
-
-  // Radix (In range: [2,8])
-, parameter int RADIX_N = 4
 ) (
   input wire logic [W - 1:0]                     x_i
 , input wire logic [$clog2(W) - 1:0]             pos_i
@@ -69,10 +66,19 @@ module e #(
 
 // ========================================================================= //
 //                                                                           //
+// Localparams                                                               //
+//                                                                           //
+// ========================================================================= //
+
+
+// ========================================================================= //
+//                                                                           //
 // Wire(s)                                                                   //
 //                                                                           //
 // ========================================================================= //
 
+logic [W - 1:0]                        pos_dec;
+logic                                  priority_vld;
 logic [W - 1:0]                        y;
 logic [$clog2(W) - 1:0]                y_enc;
 logic                                  any;
@@ -83,39 +89,32 @@ logic                                  any;
 //                                                                           //
 // ========================================================================= //
 
-if (W < 2) begin: gen_lt_2_GEN
+// ------------------------------------------------------------------------- //
+// Compute selection vector.
+dec #(.W(W)) u_dec (
+  .x_i                       (pos_i)
+, .y_o                       (pos_dec));
 
-// No priority encoder defined for W < 2
-initial begin
-  $error("E_MULTI: Unsupported vector width W=%0d; minimum is 2", W);
-end
-
-end: gen_lt_2_GEN
-else if (W <= 8) begin: no_multi_GEN
-
-// 2 - 8: infer multi-level priority encoder
-e_single #(.W(W)) u_e_single (
-  .x_i                  (x_i)
-, .pos_i                (pos_i)
+// ------------------------------------------------------------------------- //
+// Selection logic
+e_priority #(.W(W)) u_e_priority (
+  .cin_i                (1'b0)
+, .x_i                  (x_i)
+, .sel_i                (pos_dec)
 //
+, .vld_o                (priority_vld)
 , .y_o                  (y)
-, .y_enc_o              (y_enc)
-, .any_o                (any));
+, .cout_o               (/* UNUSED */));
 
-end: no_multi_GEN
-else begin: multi_GEN
+// ------------------------------------------------------------------------- //
+// 'Any' flag; indicate that a 'b0 is present in the input vector. The
+// output at y_* is therefore valid.
+// 
+assign any = (priority_vld);
 
-// > 8: use multi-level priority encoder
-e_multi #(.W(W), .RADIX_N(RADIX_N)) u_e_multi (
-  .x_i                  (x_i)
-, .pos_i                (pos_i)
-//
-, .y_o                  (y)
-, .y_enc_o              (y_enc)
-, .any_o                (any));
-
-end: multi_GEN
-
+// ------------------------------------------------------------------------- //
+// Compute encoded output.
+enc #(.W(W)) u_enc (.x_i(y), .y_o(y_enc));
 
 // ========================================================================= //
 //                                                                           //
@@ -127,4 +126,4 @@ assign any_o = any;
 assign y_o = y;
 assign y_enc_o = y_enc;
 
-endmodule : e
+endmodule : e_single

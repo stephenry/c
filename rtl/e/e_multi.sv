@@ -85,6 +85,9 @@ localparam int GROUPS_VEC_W = $bits(groups_vec_t);
 // Flag indicating whether the groups require padding to fill the last group.
 localparam bit REQUIRES_PADDING = (GROUPS_N * RADIX_N != SEARCH_WORD_W);
 
+// Number of padding bits required (if any).
+localparam int PADDING_BITS =
+  REQUIRES_PADDING ? ((GROUPS_N * RADIX_N) - W) : 0;
 
 // ========================================================================= //
 //                                                                           //
@@ -94,14 +97,23 @@ localparam bit REQUIRES_PADDING = (GROUPS_N * RADIX_N != SEARCH_WORD_W);
 
 logic [W - 1:0]                        pos_dec;
 
-groups_t                               groups_prior;
-groups_vec_t                           groups_sel;
+groups_t                               groups_c;
 groups_vec_t                           groups_in;
-groups_vec_t                           groups_out;
-groups_t                               groups_out_vld;
+groups_vec_t                           groups_sel;
+groups_vec_t                           groups_y;
+groups_t                               groups_vld;
+
+groups_t                               groups_region;
+groups_t                               groups_select;
+
+logic [W - 1:0]                        y_hi;
+logic [W - 1:0]                        y_lo;
+groups_vec_t                           y_groups;
 
 logic                                  any;
 
+logic [W - 1:0]                        y_priority;
+logic                                  y_priority_valid;
 logic [W - 1:0]                        y;
 logic [$clog2(W) - 1:0]                y_enc;
 
@@ -115,16 +127,13 @@ logic [$clog2(W) - 1:0]                y_enc;
 // Compute selection vector.
 dec #(.W(W)) u_dec (
   .x_i                       (pos_i)
-, .y_o                       (pos_dec)
-);
+, .y_o                       (pos_dec));
 
 // ------------------------------------------------------------------------- //
 // Compute input vector (padding if required).
 if (REQUIRES_PADDING) begin : gen_groups_padding
-  localparam int PADDING_BITS = (GROUPS_N * RADIX_N) - W;
-
-  assign groups_in = { {(PADDING_BITS{1'b0}}, x_i, x_i };
-  assign groups_sel = { {(PADDING_BITS{1'b0}}, pos_dec, pos_dec };
+  assign groups_in = { {PADDING_BITS{1'b0}}, x_i, x_i };
+  assign groups_sel = { {PADDING_BITS{1'b0}}, pos_dec, pos_dec };
 end
 else begin : gen_groups_no_padding
 
@@ -132,69 +141,70 @@ else begin : gen_groups_no_padding
   assign groups_sel = { pos_dec, pos_dec };
 end : gen_groups_no_padding
 
-// ------------------------------------------------------------------------- //
-// Groups prior:
-for (genvar i = 0; i < GROUPS_N; i++) begin : group_prior_GEN
-
-if (i == (GROUPS_N - 1)) begin: last_group_GEN
-
-  assign groups_prior[i] = 1'b0;
-end: last_group_GEN
-else begin: not_last_group_GEN
-  localparam int j = (i * RADIX_N);
-
-  assign groups_prior[i] = (groups_in[j] & groups_sel[j]);
-end: not_last_group_GEN
-
-end : group_prior_GEN
 
 // ------------------------------------------------------------------------- //
 //
 for (genvar i = 0; i < GROUPS_N; i++) begin : group_GEN
 
+if (i == (GROUPS_N - 1)) begin: last_group_GEN
+
   e_priority #(.W(RADIX_N)) u_e_priority (
-    .x_prior_and_sel_i       (groups_prior[i])
+    .cin_i                   (1'b0)
   , .x_i                     (groups_in[i])
   , .sel_i                   (groups_sel[i])
-  , .vld_o                   (groups_out_vld[i])
-  , .y_o                     (groups_out[i]));
+  , .vld_o                   (groups_vld[i])
+  , .y_o                     (groups_y[i])
+  , .cout_o                  (groups_c[i]));
+
+end: last_group_GEN
+else begin: not_last_group_GEN
+
+  e_priority #(.W(RADIX_N)) u_e_priority (
+    .cin_i                   (groups_c[i + 1])
+  , .x_i                     (groups_in[i])
+  , .sel_i                   (groups_sel[i])
+  , .vld_o                   (groups_vld[i])
+  , .y_o                     (groups_y[i])
+  , .cout_o                  (groups_c[i]));
+
+end: not_last_group_GEN
 
 end : group_GEN
 
-// ------------------------------------------------------------------------- //
-//
-for (genvar i = 0; i < GROUPS_N; i++) begin: group_cell_GEN
-
-if (i == (GROUPS_N - 1)) begin: last_group_cell_GEN
-
-  e_multi_cell u_e_multi_cell (
-    .vld_i                    (groups_out_vld[i])
-  , .prior_i                  (1'b0)
-  , .sel_i                    (groups_sel[(i * RADIX_N) +: RADIX_N])
-  //
-  , .next_o                   ()
-  );
-
-  end: last_group_cell_GEN
-
-else begin: not_last_group_cell_GEN
-
-  e_multi_cell u_e_multi_cell (
-    .vld_i                    (groups_out_vld[i])
-  , .prior_i                  (1'b0)
-  , .sel_i                    (groups_sel[(i * RADIX_N) +: RADIX_N])
-  //
-  , .next_o                   ()
-  );
-
-end: group_cell_GEN
 
 // ------------------------------------------------------------------------- //
-// If no bit is found in the bits preceeding pos_i, use the output
-// from the succeeding bits logic.
 //
-assign y = '0;
+for (genvar i = 0; i < GROUPS_N; i++) begin : group_output_GEN
 
+  assign y_groups[i] = ({RADIX_N{groups_vld[i]}} & groups_y[i]);
+
+end : group_output_GEN
+
+// ------------------------------------------------------------------------- //
+// Discard padding from final output (if present)
+//
+if (REQUIRES_PADDING) begin: y_groups_padding_GEN
+  logic [PADDING_BITS - 1:0]           y_padding;
+
+  assign {y_padding, y_hi, y_lo} = y_groups;
+
+end: y_groups_padding_GEN
+else begin: y_groups_no_padding_GEN
+
+  assign {y_hi, y_lo} = y_groups;
+
+end: y_groups_no_padding_GEN
+
+// ------------------------------------------------------------------------- //
+// Combine hi- and lo- priority networks to emulate rotator behaviour.
+//
+// Priority networks have no ability to detect collision on pos so, when
+// 'any' is valid and the priority network hasn't hit on a '0', the only
+// possible '0' is at pos_i.
+//
+assign y_priority = (y_hi | y_lo);
+assign y_priority_valid = (y_priority != '0);
+assign y = y_priority_valid ? y_priority : pos_dec;
 
 // ------------------------------------------------------------------------- //
 // 'Any' flag; indicate that a 'b0 is present in the input vector. The

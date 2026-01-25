@@ -63,20 +63,20 @@ if (W < OUT_W) begin : w_lt_out_w_GEN
 // OUT_W is larger than the dynamic range of the input. Padd the output
 // with zeros as necessary.
 
-for (genvar i = 0; i < OUT_W; i++) begin: y_GEN
+  for (genvar i = 0; i < OUT_W; i++) begin: y_GEN
 
-  if (i < W) begin: lt_w_GEN
+    if (i < W) begin: lt_w_GEN
 
-assign y[i] = (x_i == i[$clog2(W) - 1:0];
+assign y[i] = (x_i == i[$clog2(W) - 1:0]);
 
-  end: lt_w_GEN
-  else begin: ge_w_GEN
+    end: lt_w_GEN
+    else begin: ge_w_GEN
 
 assign y[i] = 1'b0;
 
-  end: ge_w_GEN
+    end: ge_w_GEN
 
-end: y_GEN
+  end: y_GEN
 
 end: w_lt_out_w_GEN
 else begin : w_ge_out_w_GEN
@@ -85,11 +85,11 @@ else begin : w_ge_out_w_GEN
 
   for (genvar i = 0; i < W; i++) begin: y_GEN
 
-assign y[i] = (x_i == i[$clog2(W) - 1:0];
+assign y[i] = (x_i == i[$clog2(W) - 1:0]);
 
   end: y_GEN
 
-end: y_GEN
+end: w_ge_out_w_GEN
 
 
 // ========================================================================== //

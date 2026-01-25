@@ -31,11 +31,48 @@ module e_multi_cell #(
   parameter int RADIX_N = 4
 )(
   input wire logic                               vld_i
-, input wire logic                               prior_i
 , input wire logic [RADIX_N - 1:0]               sel_i
 //
-, output wire logic                              next_o
+, input wire logic                               prior_region_i
+//
+, output wire logic                              select_o
+, output wire logic                              next_region_o
 );
+// ========================================================================= //
+//                                                                           //
+// Wire(s)                                                                   //
+//                                                                           //
+// ========================================================================= //
 
+logic                                       hit;
+logic                                       next_region;
+logic                                       select;
+
+// ========================================================================= //
+//                                                                           //
+// Logic.                                                                    //
+//                                                                           //
+// ========================================================================= //
+
+// ------------------------------------------------------------------------- //
+//
+assign hit = (sel_i != '0);
+
+// ------------------------------------------------------------------------- //
+//
+assign next_region = hit ? (~prior_region_i) : prior_region_i;
+
+// ------------------------------------------------------------------------- //
+//
+assign select = vld_i & hit & prior_region_i;
+
+// ========================================================================= //
+//                                                                           //
+// Output(s)                                                                 //
+//                                                                           //
+// ========================================================================= //
+
+assign next_region_o = next_region;
+assign select_o = select;
 
 endmodule : e_multi_cell

@@ -27,7 +27,7 @@
 
 `include "common_defs.svh"
 
-module bs #(
+module bsi #(
 // Width
   parameter int W = 32
 // Left or Right
@@ -90,4 +90,4 @@ end: bsi_PROC
 
 assign y_o = y;
 
-endmodule : bs
+endmodule : bsi

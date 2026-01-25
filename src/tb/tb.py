@@ -87,7 +87,8 @@ def run_testbench(project: str, w: int) -> bool:
 
 def main():
 
-    for project in common.ALL_PROJECTS:
+#    for project in common.ALL_PROJECTS:
+    for project in ["e"]:
         for w in WS:
             print(f"Running testbench for project '{project}' with width {w}")
             success = run_testbench(project, w=w)

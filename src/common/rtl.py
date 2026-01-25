@@ -46,6 +46,7 @@ _PROJECTS = {
         "e.sv",
         "e_multi.sv",
         "e_multi_cell.sv",
+        "e_single.sv",
         "e_priority.sv",
     ],
 }
@@ -264,12 +265,18 @@ def _render_one_file(src: pathlib.Path, dest: pathlib.Path) -> None:
             _render_pass(i, o)
 
 
-def _render_file_list(file_list: list[pathlib.Path], out_dir: pathlib.Path) -> None:
+def _render_file_list(file_list: list[pathlib.Path], out_dir: pathlib.Path) -> list[pathlib.Path]:
+    build_list = list()
+
     if not os.path.exists(out_dir):
         os.makedirs(out_dir, exist_ok=True)
 
     for f in file_list:
-        _render_one_file(f, out_dir / f.name)
+        dest_fn = (out_dir / f.name).resolve()
+        build_list.append(dest_fn)
+        _render_one_file(f, dest_fn)
+
+    return build_list
 
 
 def render_rtl(
@@ -281,7 +288,7 @@ def render_rtl(
 
     file_list = _compute_src_list(design)
 
-    _render_file_list(file_list, out_dir)
+    build_list = _render_file_list(file_list, out_dir)
 
     include_dirs = set()
     include_dirs.add(out_dir)
@@ -289,4 +296,4 @@ def render_rtl(
         os.path.dirname(file) for file in _INCLUDE_FILES
     )
 
-    return (file_list, list(include_dirs))
+    return (build_list, list(include_dirs))
