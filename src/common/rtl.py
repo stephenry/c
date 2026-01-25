@@ -48,6 +48,9 @@ _PROJECTS = {
         "e_single.sv",
         "e_priority.sv",
     ],
+    "n": [
+        "n.sv",
+    ],
 }
 
 for project, files in _PROJECTS.items():

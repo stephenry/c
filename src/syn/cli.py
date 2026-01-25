@@ -35,7 +35,7 @@ from typing import TypeAlias
 plist: TypeAlias = dict[str, int | str]
 
 # Trials to run
-runlist = ["e", "r", "s"]
+runlist = ["n", "e", "r", "s"]
 # runlist = rtl.ALL_PROJECTS
 
 # W_SWEEP = range(8, 128, 8)
@@ -86,6 +86,8 @@ projects = {
     "r": _width_parameterization(),
     # Sweep .W(x) and RADIX_N(x) parameters
     "e": _width_and_radix_parameterization(),
+    # Sweep .W(x) parameter
+    "n": _width_parameterization(),
 }
 
 

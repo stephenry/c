@@ -110,7 +110,19 @@ assign uut_x_i = in_x_r;
 assign uut_pos_i = in_pos_r;
 
 generate begin : uut_GEN
-  if (P_UUT_NAME == "s") begin : s_GEN
+  if (P_UUT_NAME == "n") begin : n_GEN
+  
+    n #(.W(W)) u_uut (
+    //
+      .x_i                  (uut_x_i)
+    , .pos_i                (uut_pos_i)
+    //
+    , .any_o                (uut_any_o)
+    , .y_o                  (uut_y_o)
+    , .y_enc_o              (uut_y_enc_o));
+
+  end : n_GEN
+  else if (P_UUT_NAME == "s") begin : s_GEN
   
     s #(.W(W)) u_uut (
     //
