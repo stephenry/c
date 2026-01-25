@@ -27,43 +27,19 @@
 
 `include "common_defs.svh"
 
-// Circuit to compute the cicular left-most '0' in a vector 'x' for a
-// given position. 'any' flag indicates output validity.
-//
-//   x                       pos   y                      y_enc    any
-//   -----------------------------------------------------------------------
-//
-//   1111_1111_1111_1110     0     0000_0000_0000_0001    0        1
-//                     ^
-//
-//   0000_0000_0000_0000     0     1000_0000_0000_0000    15       1
-//                     ^
-//
-//   0000_0000_0000_0000     1     0000_0000_0000_0001    0        1
-//                    ^
-//
-//   0000_0000_0000_0000    15     0100_0000_0000_0000    14       1
-//   ^
-//
-//   0010_1010_0011_0111     8     0000_0000_1000_0000    7        1
-//           ^
-//
-//   1111_1111_1111_1111     x     xxxx_xxxx_xxxx_xxxx    x        0
+module n_pos #(
+  // POS
+  parameter int POS = 0
 
-module n #(
   // Vector width
-  parameter int W = 32
+, parameter int W = 32
 
 // Infer shifter/rotator
 , parameter bit INFER = 1'b0
 ) (
   input wire logic [W - 1:0]                     x_i
-, input wire logic [$clog2(W) - 1:0]             pos_i
-
 //
 , output wire logic [W - 1:0]                    y_o
-, output wire logic [$clog2(W) - 1:0]            y_enc_o
-, output wire logic                              any_o
 );
 
 // ========================================================================= //
@@ -72,11 +48,14 @@ module n #(
 //                                                                           //
 // ========================================================================= //
 
-logic [W - 1:0]                        pos_dec;
-logic [W - 1:0][W - 1:0]               y_matrix;
-logic                                  any;
+logic [W - 1:0]                        x_1;
+logic [W - 1:0]                        x_2;
+logic [W - 1:0]                        x_3;
+logic [W - 1:0]                        x_4;
+logic [W - 1:0]                        x_5;
+logic [W - 1:0]                        x_6;
+
 logic [W - 1:0]                        y;
-logic [$clog2(W) - 1:0]                y_enc;
 
 // ========================================================================= //
 //                                                                           //
@@ -85,28 +64,72 @@ logic [$clog2(W) - 1:0]                y_enc;
 // ========================================================================= //
 
 // ------------------------------------------------------------------------- //
+// For a given vector position
 //
-dec #(.W(W)) u_dec (.x_i(pos_i), .y_o(pos_dec));
-
-// ------------------------------------------------------------------------- //
+//   0000_0100_0000_0000
+//   abcd_efgh_ijkl_mnop (pos=10)
+//         ^
 //
-for (genvar i = 0; i < W; i++) begin: for_each_pos_GEN
-  n_pos #(.POS(i), .W(W)) u_pos(.x_i(x_i), .y_o(y_matrix[i]));
-end: for_each_pos_GEN
-
-// ------------------------------------------------------------------------- //
+// Rotate the vector left W - POS
 //
-mux #(.N(W), .W(W)) u_max (.x_i(y_matrix), .sel_i(pos_dec), .y_o(y));
+//   ghij_klmn_opab_cdef                                   // (1) 
+//
+localparam int ROTATE_LEFT_1 = (W - POS) % W;
 
-// ------------------------------------------------------------------------- //
-// 'Any' flag; indicate that a 'b0 is present in the input vector. The
-// output at y_* is therefore valid.
-// 
-assign any = (x_i != '1);
+if (ROTATE_LEFT_1 != 0) begin: lsh_GEN
+  assign x_1 = {
+    x_i[(W - 1) - ROTATE_LEFT_1:0], x_i[W - 1:W - ROTATE_LEFT_1]};
+end: lsh_GEN
+else begin: nop_lsh_GEN
+  assign x_1 = x_i;
+end: nop_lsh_GEN
 
-// ------------------------------------------------------------------------- //
-// Compute encoded output.
-enc #(.W(W)) u_enc (.x_i(y), .y_o(y_enc));
+// Reverse the vector
+//
+//  fedc_bapo_nmkl_jihg                                    // (2)
+//
+rev #(.W(W)) u_rev_1 (.x_i(x_1), .y_o(x_2));
+
+// Increment the vector
+//
+//  1000_0000_0000_0001                                    // (3)
+//  fedc_bapo_nmkl_jihg
+//
+inc #(.W(W)) u_inc (.x_i(x_2), .y_o(x_3), .carry_o(/* UNUSED */));
+
+// Bit which transition from '0' to '1' is first '0' in original vector.
+//
+//  0000_0000_0000_0001                                    // (4)
+//  fedc_bapo_nmkl_jihg
+//
+assign x_4 = x_3 & ~x_2;
+
+// Rotate the vector right to original position
+//
+//  0000_0000_0100_0000                                    // (5)
+//  ponm klji hgfe dcba
+//
+localparam int ROTATE_RIGHT_4 = (W - POS) % W;
+
+if (ROTATE_RIGHT_4 != 0) begin: rsh_GEN
+  assign x_5 = {
+    x_4[W - 1 - ROTATE_RIGHT_4:0], x_4[W - 1:W - ROTATE_RIGHT_4]};
+end: rsh_GEN
+else begin: nop_rsh_GEN
+  assign x_5 = x_4;
+end: nop_rsh_GEN
+
+// Reverse the vector
+//
+//   0000_0010_0000_0000                                   // (6)
+//   abcd efgh ijkl mnop
+//
+rev #(.W(W)) u_rev_2 (.x_i(x_5), .y_o(x_6));
+
+// Result of x6 is y.
+//
+assign y = x_6;
+
 
 // ========================================================================= //
 //                                                                           //
@@ -114,8 +137,6 @@ enc #(.W(W)) u_enc (.x_i(y), .y_o(y_enc));
 //                                                                           //
 // ========================================================================= //
 
-assign any_o = any;
 assign y_o = y;
-assign y_enc_o = y_enc;
 
-endmodule : n
+endmodule : n_pos

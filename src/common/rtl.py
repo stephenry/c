@@ -50,6 +50,7 @@ _PROJECTS = {
     ],
     "n": [
         "n.sv",
+        "n_pos.sv",
     ],
 }
 
