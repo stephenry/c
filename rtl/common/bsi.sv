@@ -69,14 +69,14 @@ always_comb begin: bsi_PROC
 
   // Defer to synthesizer for implementation.
   case ({P_ARITH, P_ROTATE, P_RIGHT})
-    3'b000:  y = $unsigned(i_x)  << i_shift;
-    3'b001:  y = $unsigned(i_x)  >> i_shift;
-    3'b010:  y = $unsigned(i_x) <<< i_shift;
-    3'b011:  y = $unsigned(i_x) >>> i_shift;
-    3'b100:  y =   $signed(i_x)  << i_shift;
-    3'b101:  y =   $signed(i_x)  >> i_shift;
-    3'b110:  y =   $signed(i_x) <<< i_shift;
-    3'b111:  y =   $signed(i_x) >>> i_shift;
+    3'b000:  y = $unsigned(x_i)  << shift_i;
+    3'b001:  y = $unsigned(x_i)  >> shift_i;
+    3'b010:  y = $unsigned(x_i) <<< shift_i;
+    3'b011:  y = $unsigned(x_i) >>> shift_i;
+    3'b100:  y =   $signed(x_i)  << shift_i;
+    3'b101:  y =   $signed(x_i)  >> shift_i;
+    3'b110:  y =   $signed(x_i) <<< shift_i;
+    3'b111:  y =   $signed(x_i) >>> shift_i;
     default: y = 'x;
   endcase
 
