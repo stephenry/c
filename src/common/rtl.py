@@ -55,7 +55,8 @@ _PROJECTS = {
 }
 
 for project, files in _PROJECTS.items():
-    _PROJECTS[project] = [PROJECT_ROOT / "rtl" / project / f for f in files]
+    _PROJECTS[project] = [
+        (PROJECT_ROOT / "rtl" / project / f).resolve() for f in files]
 
 ALL_PROJECTS = _PROJECTS.keys()
 
@@ -74,13 +75,18 @@ _COMMON_FILES = [
 ]
 
 for i, f in enumerate(_COMMON_FILES):
-    _COMMON_FILES[i] = PROJECT_ROOT / "rtl" / "common" / f
+    _COMMON_FILES[i] = (PROJECT_ROOT / "rtl" / "common" / f).resolve()
 
 # All RTL include directories
 _INCLUDE_FILES = [
-    PROJECT_ROOT / "rtl" / "common_defs.svh",
-    PROJECT_ROOT / "rtl" / "math_pkg.svh",
+    "common_defs.svh",
+    "math_pkg.svh",
+    "asserts.svh",
 ]
+
+for i, f in enumerate(_INCLUDE_FILES):
+    _INCLUDE_FILES[i] = (PROJECT_ROOT / "rtl" / f).resolve()
+
 
 _ABC_EXE = os.environ.get("ABC_EXE", None)
 

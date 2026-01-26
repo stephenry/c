@@ -27,6 +27,7 @@
 
 `include "common_defs.svh"
 `include "math_pkg.svh"
+`include "asserts.svh"
 
 // Circuit to compute the cicular left-most '0' in a vector 'x' for a
 // given position. 'any' flag indicates output validity.
@@ -69,6 +70,18 @@ module e #(
 
 // ========================================================================= //
 //                                                                           //
+// Static Assertions                                                         //
+//                                                                           //
+// ========================================================================= //
+
+`STATIC_ASSERT(W > 0,
+  "Unsupported vector width W; must be > 0");
+
+`STATIC_ASSERT((RADIX_N >= 2) && (RADIX_N <= 8),
+  "Unsupported RADIX_N; must be in range [2, 8]");
+
+// ========================================================================= //
+//                                                                           //
 // Wire(s)                                                                   //
 //                                                                           //
 // ========================================================================= //
@@ -87,7 +100,7 @@ if (W < 2) begin: gen_lt_2_GEN
 
 // No priority encoder defined for W < 2
 initial begin
-  $error("E_MULTI: Unsupported vector width W=%0d; minimum is 2", W);
+  $error("Unsupported vector width W=%0d; minimum is 2", W);
 end
 
 end: gen_lt_2_GEN

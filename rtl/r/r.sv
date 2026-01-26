@@ -26,6 +26,7 @@
 //========================================================================== //
 
 `include "common_defs.svh"
+`include "asserts.svh"
 
 // Circuit to compute the cicular left-most '0' in a vector 'x' for a
 // given position. 'any' flag indicates output validity.
@@ -65,6 +66,15 @@ module r #(
 , output wire logic [$clog2(W) - 1:0]            y_enc_o
 , output wire logic                              any_o
 );
+
+// ========================================================================= //
+//                                                                           //
+// Static Assertions                                                         //
+//                                                                           //
+// ========================================================================= //
+
+`STATIC_ASSERT(W > 0,
+  "Unsupported vector width W; must be > 0");
 
 // ========================================================================= //
 //                                                                           //

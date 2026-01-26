@@ -25,13 +25,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //========================================================================== //
 
-`ifndef RTL_COMMON_DEFS_SVH
-`define RTL_COMMON_DEFS_SVH
+`ifndef RTL_ASSERTS_SVH
+`define RTL_ASSERTS_SVH
 
-// Default timescale
-`timescale 1ns/1ps
+`define STATIC_ASSERT(__cond, __msg) \
+    initial if (!(__cond)) $error("[%m] STATIC_ASSERT: %s", __msg)
 
-// Default nettype
-`default_nettype none
-
-`endif // RTL_COMMON_DEFS_SVH
+`endif // RTL_ASSERTS_SVH
