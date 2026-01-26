@@ -28,7 +28,7 @@
 `include "common_defs.svh"
 `include "math_pkg.svh"
 
-// Circuit to compute the cicular left-most '0' in a vector 'x' for a
+// Circuit to compute the circular left-most '0' in a vector 'x' for a
 // given position. 'any' flag indicates output validity.
 //
 //   x                       pos   y                      y_enc    any
