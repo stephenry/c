@@ -38,7 +38,7 @@ vector. Mask logic is used to propagate the carry across regions of the
 input vector that are not relevant to the search. Use of incrementer
 allows synthesis to infer optimized CLA structure for the search operation.
 
-#### (N) Naive [s.sv](./rtl/n/n.sv):
+#### (N) Naive [n.sv](./rtl/n/n.sv):
 
 The "naive"-solution consisting of the literal translation of the written
 behavioural problem description to standard SystemVerilog. The solution consists
