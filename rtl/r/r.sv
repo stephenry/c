@@ -119,8 +119,8 @@ if (INFER) begin : gen_infer_bs
   bsi #(.W(W), .P_ARITH(1'b0), .P_ROTATE(1'b1), .P_RIGHT(1'b0)) u_bsi_1 (
     .x_i             (x_i)
   , .shift_i         (shift_1[$clog2(W) - 1:0])
-  , .y_o             (res_1)
-  );
+  , .y_o             (res_1));
+
 end
 else begin : gen_explicit_bs
 
@@ -131,8 +131,8 @@ else begin : gen_explicit_bs
   , .is_arith_i      (1'b0)
   , .is_rotate_i     (1'b1)
   , .is_right_i      (1'b0)
-  , .y_o             (res_1)
-);
+  , .y_o             (res_1));
+
 end : gen_explicit_bs
 
 // Invert bits.
@@ -165,6 +165,7 @@ if (INFER) begin : gen_infer_bs_4
     .x_i             (res_3)
   , .shift_i         (shift_4[$clog2(W) - 1:0])
   , .y_o             (res_4));
+
 end
 else begin : gen_explicit_bs_4
 
@@ -176,6 +177,7 @@ else begin : gen_explicit_bs_4
   , .is_rotate_i     (1'b1)
   , .is_right_i      (1'b1)
   , .y_o             (res_4));
+
 end : gen_explicit_bs_4
 
 
