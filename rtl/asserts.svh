@@ -28,7 +28,7 @@
 `ifndef RTL_ASSERTS_SVH
 `define RTL_ASSERTS_SVH
 
-`define STATIC_ASSERT(__cond, __msg) \
-    initial if (!(__cond)) $error("[%m] STATIC_ASSERT: %s", __msg)
+`define C_STATIC_ASSERT(__cond, __msg) \
+    initial if (!(__cond)) $error("[%m] C_STATIC_ASSERT: %s", __msg)
 
 `endif // RTL_ASSERTS_SVH

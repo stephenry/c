@@ -74,10 +74,10 @@ module e #(
 //                                                                           //
 // ========================================================================= //
 
-`STATIC_ASSERT(W > 0,
+`C_STATIC_ASSERT(W > 0,
   "Unsupported vector width W; must be > 0");
 
-`STATIC_ASSERT((RADIX_N >= 2) && (RADIX_N <= 8),
+`C_STATIC_ASSERT((RADIX_N >= 2) && (RADIX_N <= 8),
   "Unsupported RADIX_N; must be in range [2, 8]");
 
 // ========================================================================= //
