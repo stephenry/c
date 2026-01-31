@@ -87,19 +87,23 @@ module e #(
 
 localparam int SEARCH_WORD_W = 2 * W;
 
-localparam int GROUPS_N = math_pkg::div_ceil(SEARCH_WORD_W, RADIX_N);
+// Priority network width must be reduced for small vector widths.
+localparam int PRI_W = (W < RADIX_N) ? W : RADIX_N;
+
+localparam int GROUPS_N = math_pkg::div_ceil(SEARCH_WORD_W, PRI_W);
 
 typedef logic [GROUPS_N - 1:0]                     groups_t;
-typedef logic [GROUPS_N - 1:0][RADIX_N - 1:0]      groups_vec_t;
+typedef logic [GROUPS_N - 1:0][PRI_W - 1:0]        groups_vec_t;
 
 localparam int GROUPS_VEC_W = $bits(groups_vec_t);
 
 // Flag indicating whether the groups require padding to fill the last group.
-localparam bit REQUIRES_PADDING = (GROUPS_N * RADIX_N != SEARCH_WORD_W);
+localparam bit REQUIRES_PADDING = (GROUPS_N * PRI_W != SEARCH_WORD_W);
 
 // Number of padding bits required (if any).
 localparam int PADDING_BITS =
-  REQUIRES_PADDING ? ((GROUPS_N * RADIX_N) - W) : 0;
+  REQUIRES_PADDING ? ((GROUPS_N * PRI_W) - W) : 0;
+
 
 // ========================================================================= //
 //                                                                           //
@@ -160,7 +164,7 @@ logic                                  carry;
 
 if (i == (GROUPS_N - 1)) begin: last_pri_GEN
 
-  e_pri #(.W(RADIX_N)) u_e_pri (
+  e_pri #(.W(PRI_W)) u_e_pri (
     .cin_i                   (1'b0)
   , .x_i                     (groups_in[i])
   , .sel_i                   (groups_sel[i])
@@ -171,7 +175,7 @@ if (i == (GROUPS_N - 1)) begin: last_pri_GEN
 end: last_pri_GEN
 else begin: not_last_pri_GEN
 
-  e_pri #(.W(RADIX_N)) u_e_pri (
+  e_pri #(.W(PRI_W)) u_e_pri (
     .cin_i                   (pri_GEN[i + 1].carry)
   , .x_i                     (groups_in[i])
   , .sel_i                   (groups_sel[i])
@@ -188,7 +192,7 @@ end : pri_GEN
 //
 for (genvar i = 0; i < GROUPS_N; i++) begin : group_output_GEN
 
-  assign y_groups[i] = ({RADIX_N{groups_vld[i]}} & groups_y[i]);
+  assign y_groups[i] = ({PRI_W{groups_vld[i]}} & groups_y[i]);
 
 end : group_output_GEN
 
