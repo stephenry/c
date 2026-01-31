@@ -56,7 +56,7 @@ module e #(
   // Vector width
   parameter int W = 32
 
-  // Radix (In range: [2,8])
+  // Radix (In range: [4,8])
 , parameter int RADIX_N = 4
 ) (
   input wire logic [W - 1:0]                     x_i
@@ -67,7 +67,6 @@ module e #(
 , output wire logic [$clog2(W) - 1:0]            y_enc_o
 , output wire logic                              any_o
 );
-
 // ========================================================================= //
 //                                                                           //
 // Static Assertions                                                         //
@@ -86,7 +85,21 @@ module e #(
 //                                                                           //
 // ========================================================================= //
 
-localparam int PRIORITY_RADIX_N = (W <= RADIX_N) ? W : RADIX_N;
+localparam int SEARCH_WORD_W = 2 * W;
+
+localparam int GROUPS_N = math_pkg::div_ceil(SEARCH_WORD_W, RADIX_N);
+
+typedef logic [GROUPS_N - 1:0]                     groups_t;
+typedef logic [GROUPS_N - 1:0][RADIX_N - 1:0]      groups_vec_t;
+
+localparam int GROUPS_VEC_W = $bits(groups_vec_t);
+
+// Flag indicating whether the groups require padding to fill the last group.
+localparam bit REQUIRES_PADDING = (GROUPS_N * RADIX_N != SEARCH_WORD_W);
+
+// Number of padding bits required (if any).
+localparam int PADDING_BITS =
+  REQUIRES_PADDING ? ((GROUPS_N * RADIX_N) - W) : 0;
 
 // ========================================================================= //
 //                                                                           //
@@ -94,9 +107,26 @@ localparam int PRIORITY_RADIX_N = (W <= RADIX_N) ? W : RADIX_N;
 //                                                                           //
 // ========================================================================= //
 
+logic [W - 1:0]                        pos_dec;
+
+groups_vec_t                           groups_in;
+groups_vec_t                           groups_sel;
+groups_vec_t                           groups_y;
+groups_t                               groups_vld;
+
+groups_t                               groups_region;
+groups_t                               groups_select;
+
+logic [W - 1:0]                        y_hi;
+logic [W - 1:0]                        y_lo;
+groups_vec_t                           y_groups;
+
+logic                                  any;
+
+logic [W - 1:0]                        y_priority;
+logic                                  y_priority_valid;
 logic [W - 1:0]                        y;
 logic [$clog2(W) - 1:0]                y_enc;
-logic                                  any;
 
 // ========================================================================= //
 //                                                                           //
@@ -104,13 +134,101 @@ logic                                  any;
 //                                                                           //
 // ========================================================================= //
 
-e_groups #(.W(W), .RADIX_N(PRIORITY_RADIX_N)) u_e_groups (
-  .x_i                  (x_i)
-, .pos_i                (pos_i)
+// ------------------------------------------------------------------------- //
+// Compute selection vector.
+dec #(.W(W)) u_dec (
+  .x_i                       (pos_i)
+, .y_o                       (pos_dec));
+
+// ------------------------------------------------------------------------- //
+// Compute input vector (padding if required).
+if (REQUIRES_PADDING) begin : gen_groups_padding
+  assign groups_in = { {PADDING_BITS{1'b0}}, x_i, x_i };
+  assign groups_sel = { {PADDING_BITS{1'b0}}, pos_dec, pos_dec };
+end
+else begin : gen_groups_no_padding
+  assign groups_in = { x_i, x_i };
+  assign groups_sel = { pos_dec, pos_dec };
+end : gen_groups_no_padding
+
+
+// ------------------------------------------------------------------------- //
 //
-, .y_o                  (y)
-, .y_enc_o              (y_enc)
-, .any_o                (any));
+for (genvar i = 0; i < GROUPS_N; i++) begin : pri_GEN
+
+logic                                  carry;
+
+if (i == (GROUPS_N - 1)) begin: last_pri_GEN
+
+  e_pri #(.W(RADIX_N)) u_e_pri (
+    .cin_i                   (1'b0)
+  , .x_i                     (groups_in[i])
+  , .sel_i                   (groups_sel[i])
+  , .vld_o                   (groups_vld[i])
+  , .y_o                     (groups_y[i])
+  , .cout_o                  (pri_GEN[i].carry));
+
+end: last_pri_GEN
+else begin: not_last_pri_GEN
+
+  e_pri #(.W(RADIX_N)) u_e_pri (
+    .cin_i                   (pri_GEN[i + 1].carry)
+  , .x_i                     (groups_in[i])
+  , .sel_i                   (groups_sel[i])
+  , .vld_o                   (groups_vld[i])
+  , .y_o                     (groups_y[i])
+  , .cout_o                  (pri_GEN[i].carry));
+
+end: not_last_pri_GEN
+
+end : pri_GEN
+
+
+// ------------------------------------------------------------------------- //
+//
+for (genvar i = 0; i < GROUPS_N; i++) begin : group_output_GEN
+
+  assign y_groups[i] = ({RADIX_N{groups_vld[i]}} & groups_y[i]);
+
+end : group_output_GEN
+
+// ------------------------------------------------------------------------- //
+// Discard padding from final output (if present)
+//
+if (REQUIRES_PADDING) begin: y_groups_padding_GEN
+  logic [PADDING_BITS - 1:0]           y_padding;
+
+  assign {y_padding, y_hi, y_lo} = y_groups;
+
+end: y_groups_padding_GEN
+else begin: y_groups_no_padding_GEN
+
+  assign {y_hi, y_lo} = y_groups;
+
+end: y_groups_no_padding_GEN
+
+// ------------------------------------------------------------------------- //
+// Combine hi- and lo- priority networks to emulate rotator behaviour.
+//
+// Priority networks have no ability to detect collision on pos so, when
+// 'any' is valid and the priority network hasn't hit on a '0', the only
+// possible '0' is at pos_i.
+//
+assign y_priority = (y_hi | y_lo);
+assign y_priority_valid = (y_priority != '0);
+assign y = y_priority_valid ? y_priority : pos_dec;
+
+// ------------------------------------------------------------------------- //
+// 'Any' flag; indicate that a 'b0 is present in the input vector. The
+// output at y_* is therefore valid.
+// 
+assign any = (x_i != '1);
+
+
+// ------------------------------------------------------------------------- //
+// Compute encoded output.
+enc #(.W(W)) u_enc (.x_i(y), .y_o(y_enc));
+
 
 // ========================================================================= //
 //                                                                           //

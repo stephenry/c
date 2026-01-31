@@ -44,8 +44,7 @@ _PROJECTS = {
     ],
     "e": [
         "e.sv",
-        "e_groups.sv",
-        "e_groups_priority.sv",
+        "e_pri.sv",
     ],
     "n": [
         "n.sv",
