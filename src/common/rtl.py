@@ -44,9 +44,8 @@ _PROJECTS = {
     ],
     "e": [
         "e.sv",
-        "e_multi.sv",
-        "e_single.sv",
-        "e_priority.sv",
+        "e_groups.sv",
+        "e_groups_priority.sv",
     ],
     "n": [
         "n.sv",
@@ -88,7 +87,8 @@ for i, f in enumerate(_INCLUDE_FILES):
     _INCLUDE_FILES[i] = (PROJECT_ROOT / "rtl" / f).resolve()
 
 
-_ABC_EXE = os.environ.get("ABC_EXE", None)
+from .env import setup_abc
+_ABC_EXE = setup_abc()
 
 
 class PLARenderer:

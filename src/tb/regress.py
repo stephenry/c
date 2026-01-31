@@ -42,35 +42,21 @@ else:
     print("Error: Could not find ABC installation.")
     sys.exit(1)
 
-parser = argparse.ArgumentParser(description="Testbench CLI")
-parser.add_argument(
-    "-p",
-    "--project",
-    type=str,
-    choices=common.ALL_PROJECTS,
-    required=True,
-    help="Project to test",
-)
 
-parser.add_argument(
-    "-w",
-    "--width",
-    type=int,
-    required=True,
-    help="Width (W) parameter for the design under test",
-)
+def run():
+    from .tb import run_testbench
 
-def main():
-    try:
-        from .tb import run_testbench
-        args = parser.parse_args()
+    # (W)idth sweep values
+    WS = [4, 8, 16, 32, 64, 128]
 
-        sys.exit(run_testbench(args.project, w=args.width))
+    for project in common.ALL_PROJECTS:
+        for w in WS:
+            print(f"Running regression for project '{project}' with width {w}")
+            success = run_testbench(project, w=w)
+            if not success:
+                print(f"Regression failed for project '{project}' with width {w}")
+                sys.exit(1)
+            print(f"Regression passed for project '{project}' with width {w}")
 
-    except EnvironmentError as e:
-        print(f"Testbench failed with error: {e}")
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
+    # All pass
+    sys.exit(0)

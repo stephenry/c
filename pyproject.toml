@@ -23,7 +23,8 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-regress = "tb.cli:regress"
+driver = "tb.cli:main"
+regress = "tb.regress:run"
 synthesize = "syn.cli:main"
 
 [dependency-groups]

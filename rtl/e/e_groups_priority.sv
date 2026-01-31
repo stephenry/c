@@ -27,7 +27,7 @@
 
 `include "common_defs.svh"
 
-module e_priority #(
+module e_groups_priority #(
   // Vector width
   parameter int W = 4
 ) (
@@ -305,4 +305,4 @@ assign cout = (~kill) & (gen | (prop & cin_i));
 assign vld_o = vld;
 assign cout_o = cout;
 
-endmodule : e_priority
+endmodule : e_groups_priority

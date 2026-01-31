@@ -82,6 +82,14 @@ module e #(
 
 // ========================================================================= //
 //                                                                           //
+// Localparams                                                               //
+//                                                                           //
+// ========================================================================= //
+
+localparam int PRIORITY_RADIX_N = (W <= RADIX_N) ? W : RADIX_N;
+
+// ========================================================================= //
+//                                                                           //
 // Wire(s)                                                                   //
 //                                                                           //
 // ========================================================================= //
@@ -96,39 +104,13 @@ logic                                  any;
 //                                                                           //
 // ========================================================================= //
 
-if (W < 2) begin: gen_lt_2_GEN
-
-// No priority encoder defined for W < 2
-initial begin
-  $error("Unsupported vector width W=%0d; minimum is 2", W);
-end
-
-end: gen_lt_2_GEN
-else if (W <= 8) begin: no_multi_GEN
-
-// 2 - 8: infer multi-level priority encoder
-e_single #(.W(W)) u_e_single (
+e_groups #(.W(W), .RADIX_N(PRIORITY_RADIX_N)) u_e_groups (
   .x_i                  (x_i)
 , .pos_i                (pos_i)
 //
 , .y_o                  (y)
 , .y_enc_o              (y_enc)
 , .any_o                (any));
-
-end: no_multi_GEN
-else begin: multi_GEN
-
-// > 8: use multi-level priority encoder
-e_multi #(.W(W), .RADIX_N(RADIX_N)) u_e_multi (
-  .x_i                  (x_i)
-, .pos_i                (pos_i)
-//
-, .y_o                  (y)
-, .y_enc_o              (y_enc)
-, .any_o                (any));
-
-end: multi_GEN
-
 
 // ========================================================================= //
 //                                                                           //

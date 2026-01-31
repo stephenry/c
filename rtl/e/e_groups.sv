@@ -51,7 +51,7 @@
 //
 //   1111_1111_1111_1111     x     xxxx_xxxx_xxxx_xxxx    x        0
 
-module e_multi #(
+module e_groups #(
   // Vector width
   parameter int W = 32
 
@@ -97,9 +97,6 @@ localparam int PADDING_BITS =
 
 logic [W - 1:0]                        pos_dec;
 
-/* verilator lint_off UNOPTFLAT */
-groups_t                               groups_c;
-/* verilator lint_on UNOPTFLAT */
 groups_vec_t                           groups_in;
 groups_vec_t                           groups_sel;
 groups_vec_t                           groups_y;
@@ -148,26 +145,28 @@ end : gen_groups_no_padding
 //
 for (genvar i = 0; i < GROUPS_N; i++) begin : group_GEN
 
+logic carry;
+
 if (i == (GROUPS_N - 1)) begin: last_group_GEN
 
-  e_priority #(.W(RADIX_N)) u_e_priority (
+  e_groups_priority #(.W(RADIX_N)) u_e_groups_priority (
     .cin_i                   (1'b0)
   , .x_i                     (groups_in[i])
   , .sel_i                   (groups_sel[i])
   , .vld_o                   (groups_vld[i])
   , .y_o                     (groups_y[i])
-  , .cout_o                  (groups_c[i]));
+  , .cout_o                  (group_GEN[i].carry));
 
 end: last_group_GEN
 else begin: not_last_group_GEN
 
-  e_priority #(.W(RADIX_N)) u_e_priority (
-    .cin_i                   (groups_c[i + 1])
+  e_groups_priority #(.W(RADIX_N)) u_e_groups_priority (
+    .cin_i                   (group_GEN[i + 1].carry)
   , .x_i                     (groups_in[i])
   , .sel_i                   (groups_sel[i])
   , .vld_o                   (groups_vld[i])
   , .y_o                     (groups_y[i])
-  , .cout_o                  (groups_c[i]));
+  , .cout_o                  (group_GEN[i].carry));
 
 end: not_last_group_GEN
 
@@ -230,4 +229,4 @@ assign any_o = any;
 assign y_o = y;
 assign y_enc_o = y_enc;
 
-endmodule : e_multi
+endmodule : e_groups

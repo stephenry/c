@@ -175,7 +175,7 @@ async def test_randomized(dut):
     await reset_sequence(dut, cycles_n=5)
 
     stimulus = []
-    for _ in range(10):
+    for _ in range(1000):
         import cocotb.types as ct
 
         x = random.randint(0, (1 << W) - 1)
