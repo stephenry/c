@@ -30,33 +30,39 @@ import sys
 import os
 import common
 
-if v := common.setup_verilator():
-    print(f"Found Verilator installation: {v}")
-else:
-    print("Error: Could not find Verilator installation.")
-    sys.exit(1)
+def setup_environment():
+    if v := common.setup_verilator():
+        print(f"Found Verilator installation: {v}")
+    else:
+        raise EnvironmentError("Error: Could not find Verilator installation.")
 
-if abc := common.setup_abc():
-    print(f"Found ABC installation: {abc}")
-else:
-    print("Error: Could not find ABC installation.")
-    sys.exit(1)
+    if abc := common.setup_abc():
+        print(f"Found ABC installation: {abc}")
+    else:
+        raise EnvironmentError("Error: Could not find ABC installation.")
 
 
 def run():
     from .tb import run_testbench
 
-    # (W)idth sweep values
-    WS = [4, 8, 16, 32, 64, 128]
+    try:
+        setup_environment()
 
-    for project in common.ALL_PROJECTS:
-        for w in WS:
-            print(f"Running regression for project '{project}' with width {w}")
-            success = run_testbench(project, w=w)
-            if not success:
-                print(f"Regression failed for project '{project}' with width {w}")
-                sys.exit(1)
-            print(f"Regression passed for project '{project}' with width {w}")
+        # (W)idth sweep values
+        WS = [4, 8, 16, 32, 64, 128]
 
-    # All pass
-    sys.exit(0)
+        for project in common.ALL_PROJECTS:
+            for w in WS:
+                print(f"Running regression for project '{project}' with width {w}")
+                success = run_testbench(project, w=w)
+                if not success:
+                    print(f"Regression failed for project '{project}' with width {w}")
+                    sys.exit(1)
+                print(f"Regression passed for project '{project}' with width {w}")
+
+        # All pass
+        sys.exit(0)
+
+    except EnvironmentError as e:
+        print(e)
+        sys.exit(1)
