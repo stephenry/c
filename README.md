@@ -2,8 +2,18 @@
 
 ## Synopsis
 
-A collection of circuits to compute the leftmost 1'b0 relative to a bit-position
-for an arbitrary sized W-bit vector. As follows:
+This project presents a Power-/Performance-/Area- (PPA) analysis of various
+solutions to a simple logic design puzzle.
+
+## Problem Statement
+
+An arbitrary W-bit vector (x) is present along with a bit position
+within it (pos). The output is a W-bit vector (y) denoting the
+position of the first '0' encountered when walking through
+each bit rightward from 'pos,' modulo the vector width. An 'any'
+flag is present to denote the case when the output is valid.
+
+Examples as follows:
 
 | x                   | pos | y                   | y_enc  | any
 |---------------------|:---:|---------------------|:-----:|:----:
@@ -14,44 +24,87 @@ for an arbitrary sized W-bit vector. As follows:
 | 0010_1010_0011_0111 |   8 | 0000_0000_1000_0000 |  7     |  1
 | 1111_1111_1111_1111 |   x | xxxx_xxxx_xxxx_xxxx |  x     |  0
 
-## Foo
-
-![Alt](https://svg.wavedrom.com/github/stephenry/c/main/docs/wave.json5?v=2)
-
 ## Realizations
+
+The following circuits are presented:
 
 #### (E) Explicit [e.sv](./rtl/e/e.sv):
 
-N-bit priorization network is explicit defined as [lookup-tables](./rtl/e/e_priority.sv)
-and grouped together using a CLA-style kill-/propagate-/generate- network. A notable
-aspect of the solution is the use of explicit embedded PLA tables which are preprocesed
-by the build environment, synthesized to SystemVerilog using the Open Source ABC
-synthesis tool and injected into rendered RTL.
+Prioritization is performed (E)xplicitly using PLA-based [lookup-tables](./rtl/e/e_priority.sv), synthesized to random logic using the ABC synthesis tool.
+Tables are chained to larger vector-widths using a CLA-style kill/propagate/generate lookahead network. Solution is noteworthy due to the use of
+explicitly PLA-tables which requires an additional intermediate RTL rendering
+step before simulation/synthesis.
 
 #### (R) Rotator [r.sv](./rtl/s/s.sv):
 
-The input vector is left-rotated such that the bit at pos becomes the LSB. A
-priorization network is applied to the rotated vector to compute the location
-of the first '0' relative to pos. The vector is then right-rotated to the
-original position to compute the final result.
+Brute-Force implementation where the input vector is denoted to a
+known position, prioritization applied to detect the presence of a '0',
+and then further rotation to place final result into its correct format.
+The solution relies on a long combinatorial path through two priority
+networks and barrel-shifer and may therefore present a timing concern.
 
 #### (S) Special [s.sv](./rtl/s/s.sv):
 
-Solution relies on incrementer circuits to compute first '0' position in the
-vector. Mask logic is used to propagate the carry across regions of the
-input vector that are not relevant to the search. Use of incrementer
-allows synthesis to infer optimized CLA structure for the search operation.
+Mask-based solution where two halfs are computed: those preceding
+pos, and those succeeding (inclusive). In the case of the preceding
+half, a mask is computed to set all bits of the succeeding half to '1'.
+The first zero is then computed by reversing both vectors and incrementing.
+The first bit to transition from '0' to '1' is the carry-out and the
+first '0' in the vector.
+
+Solution relies on an incrementer for '0' detection which allows synthesis to infer a fast-lookahead structure
+as necessary.
 
 #### (N) Naive [n.sv](./rtl/n/n.sv):
 
-The "naive"-solution consisting of the literal translation of the written
-behavioural problem description to standard SystemVerilog. The solution consists
-of two, W-bit loops: an outer loop to detect pos, and an inner loop to search
-for the first '0' at every bit in the vector relative to that initial position.
+"Naive", Brute-Force solution. For each possible value of 'pos', infer
+an prioritization network to detect the first '0'. For a given value
+of 'pos', mux out the appropriate vector.
+
+As a new priorization network is infered for each possible value of 'pos',
+rotation and mask logic can be avoided. This ought to result in
+good timing behaviour. As logic is duplicated proportional to O(W),
+area ought to grow linearly with 'W'.
+
+
+## Verification
+
+![Alt](https://svg.wavedrom.com/github/stephenry/c/main/docs/wave.json5?v=2)
+
 
 ## Physical Analysis
 
 ![Area/Frequency vs. W](./docs/sweep.png)
+
+### Discussion
+
+As expected, the long, critical path of 'r' inhibits its ability to
+reach high F over increasing W. Similarly, 'n' does not scale with 'W'
+but achieves a higher F when compared to the other solutions. The overall
+area performance of 's' and 'e' remain similar and area growth with 'W'
+is very good. It seems however that the hand-optimized lookup table solution
+of 'e' does not perform as well as the synthesized PLA of 's'.
+
+### Methodology
+
+
+The RTL for each realization was wrapped in a flop-bounding top-level, and synthesized using the Yosys/Synlig open-source synthesis tool. The 130nm (HD) SkyWater PDK was used at the 1.60v/100c corner. The resultant netlist
+was passed to OpenSTA and a timing sweap performed to compute the highest
+frequency with zero Total Negative Slack (TNS). SkyWater does not provide
+Wire Load Models (WLM) so timing analysis was performed in the absence of
+wire-delay.
+
+#### Limitation
+
+Wire-delay cannot be ignored in timing analysis. It is typically
+estimated using statistical Wire-Load Models (WLM) during synthesis,
+and using parasitic extraction in the backend after routing. In this context, it is impossible to fully recreate a modern ASICflow, so these limitations are unavoidable.
+
+Cell area is only a portion of the overall circuit area in silicon. Total
+area is influence by wiring-congestion, utilization, routability and
+floorplanning. The area figures presented therefore are an unestimate
+of the true silicon area, which may scale by some unknown function of
+the design.
 
 ## Instructions
 
