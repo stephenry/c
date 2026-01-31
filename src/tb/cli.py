@@ -28,21 +28,31 @@
 import sys
 import os
 import pathlib
+import common
 
+if v := common.setup_verilator():
+    print(f"Found Verilator installation: {v}")
+else:
+    print("Error: Could not find Verilator installation.")
+    sys.exit(1)
 
-def setup_environment():
-    verilator_root = os.environ.get("VERILATOR_ROOT")
-    if verilator_root is None:
-        raise EnvironmentError("VERILATOR_ROOT environment variable is not set.")
+if abc := common.setup_abc():
+    print(f"Found ABC installation: {abc}")
+else:
+    print("Error: Could not find ABC installation.")
+    sys.exit(1)
 
-    verilator = pathlib.Path(verilator_root) / "bin" / "verilator"
-    os.environ["PATH"] += os.pathsep + str(verilator.parent)
-
+def regress():
+    try:
+        from .tb import regress
+        sys.exit(regress())
+    except EnvironmentError as e:
+        print(f"Regression failed with error: {e}")
+        sys.exit(1)
 
 def main():
 
     try:
-        setup_environment()
 
         from .tb import main as tb_main
 

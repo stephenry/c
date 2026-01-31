@@ -30,9 +30,6 @@ import os
 import sys
 import common
 
-WS = [16, 32, 64]
-WS = [8]
-
 TB_FILES = [
     pathlib.Path(__file__).parent / "tb.sv",
 ]
@@ -53,6 +50,8 @@ def compile_and_run(
 
     build_dir = f"build_{project}_w{w}/tb"
 
+    # cocotb runner expects verilator to be in the PATH
+    # at this point.
     runner = get_runner("verilator")
     runner.build(
         sources=sources,
@@ -90,10 +89,24 @@ def main():
 
 #    for project in common.ALL_PROJECTS:
     for project in ["r"]:        
-        for w in WS:
+        for w in [16]:
             print(f"Running testbench for project '{project}' with width {w}")
             success = run_testbench(project, w=w)
             if not success:
                 print(f"Testbench failed for project '{project}' with width {w}")
                 return 1
             print(f"Testbench passed for project '{project}' with width {w}")
+
+def regress() -> int:
+    # (W)idth sweep values
+    WS = [8]
+
+    for project in ["e"]:
+        for w in WS:
+            print(f"Running regression for project '{project}' with width {w}")
+            success = run_testbench(project, w=w)
+            if not success:
+                print(f"Regression failed for project '{project}' with width {w}")
+                return 1
+            print(f"Regression passed for project '{project}' with width {w}")
+    return 0

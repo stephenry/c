@@ -97,7 +97,9 @@ localparam int PADDING_BITS =
 
 logic [W - 1:0]                        pos_dec;
 
+/* verilator lint_off UNOPTFLAT */
 groups_t                               groups_c;
+/* verilator lint_on UNOPTFLAT */
 groups_vec_t                           groups_in;
 groups_vec_t                           groups_sel;
 groups_vec_t                           groups_y;
