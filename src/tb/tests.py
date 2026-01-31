@@ -116,30 +116,10 @@ def generate_expected(w, x, pos):
 
     return y, y_enc, any_l
 
-
-@cocotb.test()
-async def test_directed(dut):
-    """Run the test of known test cases as specified in the top-level module."""
-
-    if dut.W.value != 16:
-        print(f"Testbench only supports W=16 for now (W={dut.W.value}).")
-        return
-
-    # Perform reset
-    await reset_sequence(dut, cycles_n=5)
-
-    # Generate stimulus form RTL top-level header; constrained for W=16 only.
-    directed = [
-        (0xFFFE, 0),
-        (0x0000, 0),
-        (0x0000, 1),
-        (0x0000, 15),
-        (0x2A37, 8),
-        (0xFFFF, 0),
-    ]
+async def generic_testbench(dut, test_cases):
 
     stimulus = []
-    for x, pos in directed:
+    for x, pos in test_cases:
         stimulus.append(generate_stimulus(dut.W.value, x, pos))
 
     expected = []
@@ -165,11 +145,34 @@ async def test_directed(dut):
 
     dut._log.info("Test Completed Successfully")
 
+
+@cocotb.test()
+async def test_directed(dut):
+    """Run the test of known test cases as specified in the top-level module."""
+
+    if dut.W.value != 16:
+        print(f"Testbench only supports W=16 for now (W={dut.W.value}).")
+        return
+
+    # Perform reset
+    await reset_sequence(dut, cycles_n=5)
+
+    # Generate stimulus form RTL top-level header; constrained for W=16 only.
+    directed = [
+        (0xFFFE, 0),
+        (0x0000, 0),
+        (0x0000, 1),
+        (0x0000, 15),
+        (0x2A37, 8),
+        (0xFFFF, 0),
+    ]
+
+    await generic_testbench(dut, directed)
+
 @cocotb.test()
 async def test_randomized(dut):
 
     W = dut.W.value.to_unsigned()
-    ENC_W = (W - 1).bit_length()
 
     # Perform reset
     await reset_sequence(dut, cycles_n=5)
@@ -181,26 +184,26 @@ async def test_randomized(dut):
         x = random.randint(0, (1 << W) - 1)
         pos = random.randint(0, W - 1)
 
-        stimulus.append(generate_stimulus(dut.W.value, x, pos))
+        stimulus.append((x, pos))
 
-    expected = []
-    for x, pos in stimulus:
-        expected.append(generate_expected(dut.W.value, x, pos))
+    await generic_testbench(dut, stimulus)
 
-    for a, b in zip(stimulus, expected):
-        x, pos = a
-        y, y_enc, any_o = b
-        dut._log.info(f"Stimulus: x={x}, pos={pos} => Expected: y={y}, y_enc={y_enc}, any_o={any_o}")
+@cocotb.test()
+async def test_edge_cases(dut):
+    import cocotb.types as ct
 
-    tasks = [
-        cocotb.start_soon(driver(dut, stimulus)),
-        cocotb.start_soon(checker(dut, expected))
-    ]
+    await reset_sequence(dut, cycles_n=5)
 
-    await cocotb.triggers.Combine(*tasks)
+    W = dut.W.value.to_unsigned()
 
-    # End of simulation wind-down.
-    for _ in range(5):
-        await RisingEdge(dut.clk)
+    stimulus = []
 
-    dut._log.info("Test Completed Successfully")
+    all_zeros = 0
+    for i in range(W):
+        stimulus.append((all_zeros, i))
+
+    all_ones  = (1 << W) - 1
+    for i in range(W):
+        stimulus.append((all_ones, i))
+
+    await generic_testbench(dut, stimulus)

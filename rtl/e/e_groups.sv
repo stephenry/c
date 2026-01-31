@@ -135,7 +135,6 @@ if (REQUIRES_PADDING) begin : gen_groups_padding
   assign groups_sel = { {PADDING_BITS{1'b0}}, pos_dec, pos_dec };
 end
 else begin : gen_groups_no_padding
-
   assign groups_in = { x_i, x_i };
   assign groups_sel = { pos_dec, pos_dec };
 end : gen_groups_no_padding
@@ -145,7 +144,7 @@ end : gen_groups_no_padding
 //
 for (genvar i = 0; i < GROUPS_N; i++) begin : group_GEN
 
-logic carry;
+logic                                  carry;
 
 if (i == (GROUPS_N - 1)) begin: last_group_GEN
 
