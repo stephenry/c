@@ -26,10 +26,11 @@
 ## ========================================================================= ##
 
 import cocotb
+from cocotb.triggers import RisingEdge, FallingEdge
 
-from cocotb.clock import Clock
-from cocotb.triggers import Timer, RisingEdge, FallingEdge
+import random
 
+random.seed(42)
 
 async def reset_sequence(dut, cycles_n: int) -> None:
     dut.arst_n.value = 1
@@ -43,81 +44,77 @@ async def reset_sequence(dut, cycles_n: int) -> None:
     await RisingEdge(dut.clk)
 
 
-async def validate_output(dut, expected_outputs) -> None:
+async def await_cycles(dut, cycles_n: int) -> None:
+    for _ in range(cycles_n):
+        await RisingEdge(dut.clk)
 
-    for y, y_enc, any in expected_outputs:
-
-        await FallingEdge(dut.clk)
-
-        while not dut.vld_o.value:
-            await FallingEdge(dut.clk)
-
-        dut._log.info(
-            f"input stimulus applied: x_o={dut.x_o.value.to_unsigned():#0{dut.W.value.to_unsigned()}b}, "
-            f"pos_o={dut.pos_o.value.to_unsigned()}, "
-            f"Validating outputs: y_o={dut.y_o.value.to_unsigned():#0{dut.W.value.to_unsigned()}b}, "
-            f"y_enc_o={dut.y_enc_o.value.to_unsigned()}, any_o={bool(dut.any_o.value)}"
-        )
-
-        mismatchs = []
-
-        if bool(dut.any_o.value) != any:
-            mismatchs.append(
-                f"Output any_o mismatch: expected {any}, got {bool(dut.any_o.value)}"
-            )
-
-        if any:
-
-            if dut.y_o.value.to_unsigned() != y:
-                mismatchs.append(
-                    f"Output y_o mismatch: expected {y:#0{dut.W.value.to_unsigned()}b}, "
-                    f"got {dut.y_o.value.to_unsigned():#0{dut.W.value.to_unsigned()}b}"
-                )
-
-            if dut.y_enc_o.value.to_unsigned() != y_enc:
-                mismatchs.append(
-                    f"Output y_enc_o mismatch: expected {y_enc}, "
-                    f"got {dut.y_enc_o.value.to_unsigned()}"
-                )
-
-        if mismatchs:
-            break
-
-    if mismatchs:
-        error_msg = "Validation failed with the following mismatches:\n" + "\n".join(
-            mismatchs
-        )
-        dut._log.error(error_msg)
-        for _ in range(5):
-            await FallingEdge(dut.clk)
-        assert False, error_msg
-    else:
-        dut._log.info("All outputs validated successfully.")
-
-
-async def emit_stimulus(dut, stimulus: list[tuple[int, int]]) -> None:
-    """Emit stimulus based on provided test cases.
-
-    Each test case is a tuple of (x_i, pos_i).
-    """
-    dut.vld_i.value = 0
-    await RisingEdge(dut.clk)
-
-    for x, pos in stimulus:
-        dut.vld_i.value = 1
+async def driver(dut, test_cases):
+    # Drive stimulus
+    for x, pos in test_cases:
         dut.x_i.value = x
         dut.pos_i.value = pos
         await RisingEdge(dut.clk)
 
-    dut.vld_i.value = 0
+    dut.x_i.value = 0
+    dut.pos_i.value = 0
     await RisingEdge(dut.clk)
 
-    dut._log.info("All stimulus emitted.")
+async def checker(dut, expected):
+
+    for _ in range(2):
+        await FallingEdge(dut.clk)
+    
+    for y_exp, y_enc_exp, any_exp in expected:
+        await FallingEdge(dut.clk)
+
+        any_actual = dut.any_o.value
+        assert any_actual == any_exp, \
+            f"any_o mismatch: expected {any_exp}, got {any_actual}"
+
+        if any_actual:
+            # Then, check results.
+            assert y_exp == dut.y_o.value, \
+                f"y_o mismatch: expected {y_exp}, got {dut.y_o.value}"
+
+            assert y_enc_exp == dut.y_enc_o.value, \
+                f"y_enc_o mismatch: expected {y_enc_exp}, got {dut.y_enc}"
 
 
-async def await_cycles(dut, cycles_n: int) -> None:
-    for _ in range(cycles_n):
-        await RisingEdge(dut.clk)
+def generate_stimulus(w, x, pos):
+    import cocotb.types as ct
+
+    W = w.to_unsigned()
+
+    x_la = ct.LogicArray.from_unsigned(x, range=W)
+    pos_la = ct.LogicArray.from_unsigned(pos, range=(W - 1).bit_length())
+
+    return x_la, pos_la
+
+def generate_expected(w, x, pos):
+    assert pos.to_unsigned() < w.to_unsigned(), "Position out of range"
+
+    import cocotb.types as ct
+
+    W = w.to_unsigned()
+    Y_ENC_W = (W - 1).bit_length()
+
+    # Any:
+    any_cond = (x != ct.LogicArray(W * '1', range=W))
+    any_l = ct.Logic(any_cond)
+
+    # Don't care by default.
+    y = ct.LogicArray(W * '0', range=W)
+    y_enc = ct.LogicArray(Y_ENC_W * '0', range=Y_ENC_W)
+    
+    if any_cond:
+        for i in range(W):
+            j = (pos.to_unsigned() - i - 1) % W
+            if x[j] == 0:
+                y = ct.LogicArray.from_unsigned(1 << j, range=W)
+                y_enc = ct.LogicArray.from_unsigned(j, range=Y_ENC_W)
+                break
+
+    return y, y_enc, any_l
 
 
 @cocotb.test()
@@ -131,18 +128,76 @@ async def test_directed(dut):
     # Perform reset
     await reset_sequence(dut, cycles_n=5)
 
-    test_cases = [
-        (0xFFFE, 0, 0x0001, 0, True),
-        (0x0000, 0, 0x8000, 15, True),
-        (0x0000, 1, 0x0001, 0, True),
-        (0x0000, 15, 0x4000, 14, True),
-        (0x2A37, 8, 0x0080, 7, True),
-        (0xFFFF, 0, 0x0000, 0, False),
+    # Generate stimulus form RTL top-level header; constrained for W=16 only.
+    directed = [
+        (0xFFFE, 0),
+        (0x0000, 0),
+        (0x0000, 1),
+        (0x0000, 15),
+        (0x2A37, 8),
+        (0xFFFF, 0),
     ]
 
-    cocotb.start_soon(emit_stimulus(dut, [(tc[0], tc[1]) for tc in test_cases]))
+    stimulus = []
+    for x, pos in directed:
+        stimulus.append(generate_stimulus(dut.W.value, x, pos))
 
-    await validate_output(dut, [(tc[2], tc[3], tc[4]) for tc in test_cases])
+    expected = []
+    for x, pos in stimulus:
+        y, y_enc, any_o = generate_expected(dut.W.value, x, pos)
+        expected.append((y, y_enc, any_o))
+
+    for a, b in zip(stimulus, expected):
+        x, pos = a
+        y, y_enc, any_o = b
+        dut._log.info(f"Stimulus: x={x}, pos={pos} => Expected: y={y}, y_enc={y_enc}, any_o={any_o}")
+
+    tasks = [
+        cocotb.start_soon(driver(dut, stimulus)),
+        cocotb.start_soon(checker(dut, expected))
+    ]
+
+    await cocotb.triggers.Combine(*tasks)
+
+    # End of simulation wind-down.
+    for _ in range(5):
+        await RisingEdge(dut.clk)
+
+    dut._log.info("Test Completed Successfully")
+
+@cocotb.test()
+async def test_randomized(dut):
+
+    W = dut.W.value.to_unsigned()
+    ENC_W = (W - 1).bit_length()
+
+    # Perform reset
+    await reset_sequence(dut, cycles_n=5)
+
+    stimulus = []
+    for _ in range(1000):
+        import cocotb.types as ct
+
+        x = random.randint(0, (1 << W) - 1)
+        pos = random.randint(0, W - 1)
+
+        stimulus.append(generate_stimulus(dut.W.value, x, pos))
+
+    expected = []
+    for x, pos in stimulus:
+        expected.append(generate_expected(dut.W.value, x, pos))
+
+    for a, b in zip(stimulus, expected):
+        x, pos = a
+        y, y_enc, any_o = b
+        dut._log.info(f"Stimulus: x={x}, pos={pos} => Expected: y={y}, y_enc={y_enc}, any_o={any_o}")
+
+    tasks = [
+        cocotb.start_soon(driver(dut, stimulus)),
+        cocotb.start_soon(checker(dut, expected))
+    ]
+
+    await cocotb.triggers.Combine(*tasks)
 
     # End of simulation wind-down.
     for _ in range(5):

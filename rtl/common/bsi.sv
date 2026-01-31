@@ -71,10 +71,10 @@ always_comb begin: bsi_PROC
   case ({P_ARITH, P_ROTATE, P_RIGHT}) inside
     3'b000:  y = x_i << shift_i;
     3'b001:  y = x_i >> shift_i;
-    3'b1?0:  y = x_i <<< shift_i;
-    3'b1?1:  y = x_i >>> shift_i;
-    3'b?10:  y = (x_i << shift_i) | (x_i >> (W - shift_i));
-    3'b?11:  y = (x_i >> shift_i) | (x_i << (W - shift_i));
+    3'b100:  y = x_i <<< shift_i;
+    3'b101:  y = x_i >>> shift_i;
+    3'b?10:  y = (x_i << shift_i) | (x_i >> (W[SHIFT_W - 1:0] - shift_i));
+    3'b?11:  y = (x_i >> shift_i) | (x_i << (W[SHIFT_W - 1:0] - shift_i));
     default: y = 'x;
   endcase
 

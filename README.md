@@ -14,6 +14,8 @@ for an arbitrary sized W-bit vector. As follows:
 | 0010_1010_0011_0111 |   8 | 0000_0000_1000_0000 |  7     |  1
 | 1111_1111_1111_1111 |   x | xxxx_xxxx_xxxx_xxxx |  x     |  0
 
+![Alt](https://svg.wavedrom.com/github/stephenry/c/main/docs/wave.json5)
+
 ## Realizations
 
 #### (E) Explicit [e.sv](./rtl/e/e.sv):

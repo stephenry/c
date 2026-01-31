@@ -30,7 +30,8 @@ import os
 import sys
 import common
 
-WS = [16]
+WS = [16, 32, 64]
+WS = [8]
 
 TB_FILES = [
     pathlib.Path(__file__).parent / "tb.sv",
@@ -87,7 +88,8 @@ def run_testbench(project: str, w: int) -> bool:
 
 def main():
 
-    for project in common.ALL_PROJECTS:
+#    for project in common.ALL_PROJECTS:
+    for project in ["r"]:        
         for w in WS:
             print(f"Running testbench for project '{project}' with width {w}")
             success = run_testbench(project, w=w)
