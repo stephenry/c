@@ -67,6 +67,7 @@ module e #(
 , output wire logic [$clog2(W) - 1:0]            y_enc_o
 , output wire logic                              any_o
 );
+
 // ========================================================================= //
 //                                                                           //
 // Static Assertions                                                         //
