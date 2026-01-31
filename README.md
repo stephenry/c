@@ -16,7 +16,7 @@ for an arbitrary sized W-bit vector. As follows:
 
 ## Foo
 
-![Alt](https://svg.wavedrom.com/github/stephenry/c/main/docs/wave.json5)
+![Alt](https://svg.wavedrom.com/github/stephenry/c/main/docs/wave.json5?v=2)
 
 ## Realizations
 
