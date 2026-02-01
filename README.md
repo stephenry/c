@@ -79,7 +79,7 @@ in the testbench top-level. The diagram shown above therefore illustrates
 the two-cycle latency between input to output. Test cases are as follows:
 
 ### [Directed](./src/tb/tests.py)
-To test the specific input stimulus cases as presented in the "Problemm Statement" section of this document.
+To test the specific input stimulus cases as presented in the "Problem Statement" section of this document.
 
 ### [Randomized](./src/tb/tests.py)
 To test 10000 random vector, 'pos' tuples for correctness.
