@@ -1,5 +1,9 @@
 # U
 
+[![cocotb](https://img.shields.io/badge/verification-cocotb-4A90E2)](https://github.com/cocotb/cocotb)
+[![SystemVerilog](https://img.shields.io/badge/language-SystemVerilog-blue)](https://ieeexplore.ieee.org/document/8299595)
+[![SkyWater 130nm](https://img.shields.io/badge/PDK-SkyWater%20130nm-green)](https://github.com/google/skywater-pdk)
+
 ## Synopsis
 
 PPA comparison of four RTL styles for offset leading-zero detection using cocotb verification and open-source synthesis flow.
