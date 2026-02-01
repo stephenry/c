@@ -118,4 +118,10 @@ def lint_all_svlint() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(lint_all_svlint())
+    if common.setup_svlint():
+        sys.exit(lint_all_svlint())
+    elif common.setup_verilator():
+        sys.exit(lint_all_verilator())
+    else:
+        print("Error: Could not find SVLINT or Verilator installation.")
+        sys.exit(1)
