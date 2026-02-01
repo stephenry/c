@@ -81,13 +81,13 @@ designs are themselves fully combinatorial, they are flop bounded
 in the testbench top-level. The diagram shown above therefore illustrates
 the two-cycle latency between input to output. Test cases are as follows:
 
-### [Randomized](./src/tb/tests.py)
+### [Randomized](./src/tb/tests.py#L173)
 To test 10000 random vector, 'pos' tuples for correctness.
 
-### [Edge Cases](./src/tb/tests.py)
+### [Edge Cases](./src/tb/tests.py#L192)
 To test boundary cases such as all-ones and all-zeros for a sweap of 'pos'.
 
-### [Directed](./src/tb/tests.py)
+### [Directed](./src/tb/tests.py#L150)
 To test the specific input stimulus cases as presented in the "Problem Statement" section of this document.
 
 ## Physical Analysis
