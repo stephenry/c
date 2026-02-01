@@ -30,10 +30,12 @@ The following circuits are presented:
 
 #### (E) Explicit [e.sv](./rtl/e/e.sv):
 
-Prioritization is performed (E)xplicitly using PLA-based [lookup-tables](./rtl/e/e_priority.sv), synthesized to random logic using the ABC synthesis tool.
-Tables are chained to larger vector-widths using a CLA-style kill/propagate/generate lookahead network. Solution is noteworthy due to the use of
-explicitly PLA-tables which requires an additional intermediate RTL rendering
-step before simulation/synthesis.
+Prioritization is performed (E)xplicitly using PLA-based 
+[lookup-tables](./rtl/e/e_priority.sv), synthesized to random logic 
+using the ABC synthesis tool. Tables are chained to larger vector-widths 
+using a CLA-style kill/propagate/generate lookahead network. Solution is 
+noteworthy due to the use of explicitly PLA-tables which requires an 
+additional intermediate RTL rendering step before simulation/synthesis.
 
 #### (R) Rotator [r.sv](./rtl/s/s.sv):
 
@@ -52,8 +54,8 @@ The first zero is then computed by reversing both vectors and incrementing.
 The first bit to transition from '0' to '1' is the carry-out and the
 first '0' in the vector.
 
-Solution relies on an incrementer for '0' detection which allows synthesis to infer a fast-lookahead structure
-as necessary.
+Solution relies on an incrementer for '0' detection which allows synthesis
+to infer a fast-lookahead structure as necessary.
 
 #### (N) Naive [n.sv](./rtl/n/n.sv):
 
@@ -71,6 +73,23 @@ area ought to grow linearly with 'W'.
 
 ![Alt](https://svg.wavedrom.com/github/stephenry/c/main/docs/wave.json5?v=2)
 
+Verification is performed using cocotb and Verilator. Although the
+designs are themselves fully combinatorial, they are flop bounded
+in the testbench top-level. The diagram shown above therefore illustrates
+the two-cycle latency between input to output.
+
+Test cases are as follows:
+
+### [Directed](./src/tb/tests.py) 
+
+To test the specific input stimulus cases as presented in the "Problemm Statement" section of this document.
+
+### [Randomized](./src/tb/tests.py)
+To test 10000 random vector, 'pos' tuples for correctness.
+
+### [Edge Cases](./src/tb/tests.py)
+
+To test boundary cases such as all-ones and all-zeros for a sweap of 'pos'.
 
 ## Physical Analysis
 
@@ -88,7 +107,9 @@ of 'e' does not perform as well as the synthesized PLA of 's'.
 ### Methodology
 
 
-The RTL for each realization was wrapped in a flop-bounding top-level, and synthesized using the Yosys/Synlig open-source synthesis tool. The 130nm (HD) SkyWater PDK was used at the 1.60v/100c corner. The resultant netlist
+The RTL for each realization was wrapped in a flop-bounding top-level, and 
+synthesized using the Yosys/Synlig open-source synthesis tool. The 130nm (HD) 
+SkyWater PDK was used at the 1.60v/100c corner. The resultant netlist
 was passed to OpenSTA and a timing sweap performed to compute the highest
 frequency with zero Total Negative Slack (TNS). SkyWater does not provide
 Wire Load Models (WLM) so timing analysis was performed in the absence of
@@ -98,7 +119,9 @@ wire-delay.
 
 Wire-delay cannot be ignored in timing analysis. It is typically
 estimated using statistical Wire-Load Models (WLM) during synthesis,
-and using parasitic extraction in the backend after routing. In this context, it is impossible to fully recreate a modern ASICflow, so these limitations are unavoidable.
+and using parasitic extraction in the backend after routing. In this context, 
+it is impossible to fully recreate a modern ASICflow, so these limitations 
+are unavoidable.
 
 Cell area is only a portion of the overall circuit area in silicon. Total
 area is influence by wiring-congestion, utilization, routability and
@@ -108,3 +131,50 @@ the design.
 
 ## Instructions
 
+The flow is scripted using Python. Verification is performed using
+cocotb and Verilator. Synthesis is performed using Berkley's ABC
+Synthesis tool, the Synlig front-end for Yosys and OpenSTA.
+
+The [Dockerfile](./devcontainer/Dockerfile) is the recommended
+environment for this project. 
+
+### Installation
+
+Performs necessary installation into the Python virtual-environment
+and installs all tools.
+
+```
+poetry install
+```
+
+### Simulation
+
+A design can be tested by invoking:
+
+```
+poetry run driver -p <project> -w <width>
+```
+
+Where "<project>" and "<width>" denote the project and its width.
+
+### Regresssion
+
+A full regression can be invoked using:
+
+```
+poetry run regress
+```
+
+This invokes the verification flow for each design across a 'W'
+sweap and various parameterizations.
+
+### Synthesis
+
+To invoke synthesis, run the following command:
+
+```
+poetry run syn
+```
+
+This command shall recreate the PNG file illustrating area/frequency
+performance of each design across 'W'.
