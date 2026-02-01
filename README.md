@@ -37,16 +37,16 @@ Prioritization is performed (E)xplicitly using PLA-based
 [lookup-tables](./rtl/e/e_priority.sv), synthesized to random logic 
 using the ABC synthesis tool. Tables are chained to larger vector-widths 
 using a CLA-style kill/propagate/generate lookahead network. Solution is 
-noteworthy due to the use of explicitly PLA-tables which requires an 
+noteworthy due to the use of explicit PLA-tables which require an 
 additional intermediate RTL rendering step before simulation/synthesis.
 
 #### (R) Rotator [r.sv](./rtl/s/s.sv):
 
-Brute-Force implementation where the input vector is denoted to a
+Brute-Force implementation where the input vector is rotated to a
 known position, prioritization applied to detect the presence of a '0',
-and then further rotation to place final result into its correct format.
-The solution relies on a long combinatorial path through two priority
-networks and barrel-shifer and may therefore present a timing concern.
+and then rotated back to its original location. The solution relies
+on a long combinatorial path through two priority networks and
+barrel-shifer and may therefore present a timing concern.
 
 #### (S) Special [s.sv](./rtl/s/s.sv):
 
