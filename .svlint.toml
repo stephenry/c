@@ -67,7 +67,7 @@ re_forbidden_var_class = "^[^X](UNCONFIGURED|.*)$"
 re_forbidden_var_classmethod = "^[^X](UNCONFIGURED|.*)$"
 
 [option.unpacked_array]
-localparam_declaration = false
+localparam_declaration = true
 param_declaration = false
 specparam_declaration = false
 inout_declaration = false
@@ -77,7 +77,7 @@ output_declaration = false
 interface_port_declaration = false
 ref_declaration = false
 data_declaration = true
-net_declaration = false
+net_declaration = true
 
 [textrules]
 header_copyright = false
@@ -93,7 +93,7 @@ blocking_assignment_in_always_latch = false
 case_default = true
 default_nettype_none = true
 default_nettype_wire_at_end = false
-enum_with_type = false
+enum_with_type = true
 eventlist_comma_always_ff = false
 eventlist_or = false
 explicit_brackets_for_confusing_precedence = false
@@ -227,7 +227,7 @@ style_keyword_datatype = false
 style_keyword_end = false
 style_keyword_maybelabel = false
 style_keyword_new = false
-style_keyword_newline = false
+style_keyword_newline = true
 style_operator_arithmetic = false
 style_operator_arithmetic_leading_space = false
 style_operator_boolean = false
@@ -235,8 +235,8 @@ style_operator_boolean_leading_space = false
 style_operator_integer = false
 style_operator_integer_leading_space = false
 style_operator_unary = false
-style_trailingwhitespace = false
-tab_character = false
+style_trailingwhitespace = true
+tab_character = true
 unpacked_array = false
 uppercamelcase_interface = false
 uppercamelcase_module = false

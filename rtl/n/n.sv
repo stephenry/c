@@ -108,7 +108,7 @@ mux #(.N(W), .W(W)) u_max (.x_i(y_matrix), .sel_i(pos_dec), .y_o(y));
 // ------------------------------------------------------------------------- //
 // 'Any' flag; indicate that a 'b0 is present in the input vector. The
 // output at y_* is therefore valid.
-// 
+//
 assign any = (x_i != '1);
 
 // ------------------------------------------------------------------------- //

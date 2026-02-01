@@ -68,7 +68,7 @@ logic [W - 1:0]                        y;
 // comparisons become constant. Constant expressions for certain indices
 // are okay in a loop, but some linters complain about them, so they have
 // to be written out explicitly.
-//  
+//
 for (genvar i = 0; i < W; i++) begin : idx_GEN
 
 if (i == 0) begin : first_BIT_GEN

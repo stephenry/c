@@ -191,7 +191,7 @@ assign y = res_4;
 // ------------------------------------------------------------------------- //
 // 'Any' flag; indicate that a 'b0 is present in the input vector. The
 // output at y_* is therefore valid.
-// 
+//
 assign any = (x_i != '1);
 
 

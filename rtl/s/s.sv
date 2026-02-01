@@ -198,7 +198,7 @@ assign y = (pre_2 != '1) ? pre_6 : post_4;
 // ------------------------------------------------------------------------- //
 // 'Any' flag; indicate that a 'b0 is present in the input vector. The
 // output at y_* is therefore valid.
-// 
+//
 assign any = (x_i != '1);
 
 

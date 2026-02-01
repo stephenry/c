@@ -223,7 +223,7 @@ assign y = y_priority_valid ? y_priority : pos_dec;
 // ------------------------------------------------------------------------- //
 // 'Any' flag; indicate that a 'b0 is present in the input vector. The
 // output at y_* is therefore valid.
-// 
+//
 assign any = (x_i != '1);
 
 

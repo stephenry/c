@@ -72,7 +72,7 @@ logic                                  UNUSED__y;
 //
 // Rotate the vector left W - POS
 //
-//   ghij_klmn_opab_cdef                                   // (1) 
+//   ghij_klmn_opab_cdef                                   // (1)
 //
 localparam int ROTATE_LEFT_1 = (W - POS) % W;
 
