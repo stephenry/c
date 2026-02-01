@@ -152,10 +152,11 @@ poetry install
 A design can be tested by invoking:
 
 ```
-poetry run driver -p <project> -w <width>
+poetry run driver -p $PROJECT -w $WIDTH
 ```
 
-Where "<project>" and "<width>" denote the project and its width.
+Where "$PROJECT" and "$WIDTH" denote the project and its width
+respectively.
 
 ### Regresssion
 
