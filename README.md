@@ -34,7 +34,7 @@ The following circuits are presented:
 #### (E) Explicit [e.sv](./rtl/e/e.sv):
 
 Prioritization is performed (E)xplicitly using PLA-based 
-[lookup-tables](./rtl/e/e_priority.sv), synthesized to random logic 
+[lookup-tables](./rtl/e/e_pri.sv), synthesized to random logic 
 using the ABC synthesis tool. Tables are chained to larger vector-widths 
 using a CLA-style kill/propagate/generate lookahead network. Solution is 
 noteworthy due to the use of explicit PLA-tables which require an 
