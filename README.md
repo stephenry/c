@@ -84,7 +84,7 @@ To test 10000 random vector, 'pos' tuples for correctness.
 ### [Edge Cases](./src/tb/tests.py)
 To test boundary cases such as all-ones and all-zeros for a sweap of 'pos'.
 
-### [Directed](./src/tb/tests.py)
+### [Directed](./src/tb/tests.py)
 To test the specific input stimulus cases as presented in the "Problem Statement" section of this document.
 
 ## Physical Analysis
