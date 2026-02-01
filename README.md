@@ -146,6 +146,14 @@ and installs all tools.
 poetry install
 ```
 
+### Lint
+
+Linting can be performed using:
+
+```
+poetry run lint
+```
+
 ### Simulation
 
 A design can be tested by invoking:

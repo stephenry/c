@@ -33,9 +33,6 @@ module n_pos #(
 
   // Vector width
 , parameter int W = 32
-
-// Infer shifter/rotator
-, parameter bit INFER = 1'b0
 ) (
   input wire logic [W - 1:0]                     x_i
 //
@@ -51,11 +48,14 @@ module n_pos #(
 logic [W - 1:0]                        x_1;
 logic [W - 1:0]                        x_2;
 logic [W - 1:0]                        x_3;
+logic                                  x_3_cout;
 logic [W - 1:0]                        x_4;
 logic [W - 1:0]                        x_5;
 logic [W - 1:0]                        x_6;
 
 logic [W - 1:0]                        y;
+
+logic                                  UNUSED__y;
 
 // ========================================================================= //
 //                                                                           //
@@ -95,7 +95,7 @@ rev #(.W(W)) u_rev_1 (.x_i(x_1), .y_o(x_2));
 //  1000_0000_0000_0001                                    // (3)
 //  fedc_bapo_nmkl_jihg
 //
-inc #(.W(W)) u_inc (.x_i(x_2), .y_o(x_3), .carry_o(/* UNUSED */));
+inc #(.W(W)) u_inc (.x_i(x_2), .y_o(x_3), .carry_o(x_3_cout));
 
 // Bit which transition from '0' to '1' is first '0' in original vector.
 //
@@ -130,6 +130,13 @@ rev #(.W(W)) u_rev_2 (.x_i(x_5), .y_o(x_6));
 //
 assign y = x_6;
 
+// ========================================================================= //
+//                                                                           //
+// Unused(s)                                                                 //
+//                                                                           //
+// ========================================================================= //
+
+assign UNUSED__y = ^{ x_3_cout };
 
 // ========================================================================= //
 //                                                                           //

@@ -96,8 +96,6 @@ localparam int GROUPS_N = math_pkg::div_ceil(SEARCH_WORD_W, PRI_W);
 typedef logic [GROUPS_N - 1:0]                     groups_t;
 typedef logic [GROUPS_N - 1:0][PRI_W - 1:0]        groups_vec_t;
 
-localparam int GROUPS_VEC_W = $bits(groups_vec_t);
-
 // Flag indicating whether the groups require padding to fill the last group.
 localparam bit REQUIRES_PADDING = (GROUPS_N * PRI_W != SEARCH_WORD_W);
 
@@ -119,9 +117,6 @@ groups_vec_t                           groups_sel;
 groups_vec_t                           groups_y;
 groups_t                               groups_vld;
 
-groups_t                               groups_region;
-groups_t                               groups_select;
-
 logic [W - 1:0]                        y_hi;
 logic [W - 1:0]                        y_lo;
 groups_vec_t                           y_groups;
@@ -132,6 +127,8 @@ logic [W - 1:0]                        y_priority;
 logic                                  y_priority_valid;
 logic [W - 1:0]                        y;
 logic [$clog2(W) - 1:0]                y_enc;
+
+logic                                  UNUSED__nets;
 
 // ========================================================================= //
 //                                                                           //
@@ -234,6 +231,14 @@ assign any = (x_i != '1);
 // Compute encoded output.
 enc #(.W(W)) u_enc (.x_i(y), .y_o(y_enc));
 
+// ========================================================================= //
+//                                                                           //
+// Unused(s)                                                                 //
+//                                                                           //
+// ========================================================================= //
+
+// Avoid unused group signals.
+assign UNUSED__nets = ^{ pri_GEN[0].carry };
 
 // ========================================================================= //
 //                                                                           //

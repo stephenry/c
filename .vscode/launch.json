@@ -16,6 +16,14 @@
             "module": "syn.cli",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/src"
+        },
+        {
+            "name": "Debug Lint",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "lint.cli",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src"
         }
     ]
 }

@@ -95,6 +95,10 @@ logic [W - 1:0]                        post_4;
 logic [W - 1:0]                        y;
 logic [$clog2(W) - 1:0]                y_enc;
 
+logic                                  inc_pre_carry_o;
+logic                                  inc_post_carry_o;
+logic                                  UNUSED__nets;
+
 // ========================================================================= //
 //                                                                           //
 // Logic.                                                                    //
@@ -131,7 +135,8 @@ rev #(.W(W)) u_rev_0_pre (.x_i(pre_2), .y_o(pre_3));
 //
 //     1001_1100_0000_0000                              // (4)
 //
-inc #(.W(W)) u_inc_pre (.x_i(pre_3), .y_o(pre_4), .carry_o(/* UNUSED */));
+inc #(.W(W)) u_inc_pre (
+  .x_i(pre_3), .y_o(pre_4), .carry_o(inc_pre_carry_o));
 
 // Detect the bit which transitions from '1' to '0' in (3) to (4).
 //
@@ -165,7 +170,8 @@ rev #(.W(W)) u_rev_post (.x_i(x_i), .y_o(post_1));
 //
 //     1001_1010_0100_1100                              // (2)
 //
-inc #(.W(W)) u_inc_post (.x_i(post_1), .y_o(post_2), .carry_o(/* UNUSED */));
+inc #(.W(W)) u_inc_post (
+  .x_i(post_1), .y_o(post_2), .carry_o(inc_post_carry_o));
 
 // Detect the bit which transitions from '1' to '0' in (1) to
 //
@@ -200,6 +206,15 @@ assign any = (x_i != '1);
 // Compute encoded output.
 enc #(.W(W)) u_enc (.x_i(y), .y_o(y_enc));
 
+// ========================================================================= //
+//                                                                           //
+// Unused(s)                                                                 //
+//                                                                           //
+// ========================================================================= //
+
+// ------------------------------------------------------------------------- //
+//
+assign UNUSED__nets = ^{ inc_pre_carry_o, inc_post_carry_o };
 
 // ========================================================================= //
 //                                                                           //

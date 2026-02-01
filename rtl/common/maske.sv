@@ -76,66 +76,66 @@ generate begin : mask_GEN
   if (i == 0) begin : first_BIT_GEN
 
     case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
-      2'b00: begin
+      2'b00: begin: rex
         // Right exclusive
         assign y[i] = (x_i != 'b0);
-      end
-      2'b01: begin
+      end: rex
+      2'b01: begin: lex
         // Left exclusive
         assign y[i] = 1'b0;
-      end
-      2'b10: begin
+      end: lex
+      2'b10: begin: rinc
         // Right inclusive
         assign y[i] = 1'b1;
-      end
-      2'b11: begin
+      end: rinc
+      2'b11: begin: linc
         // Left inclusive
         assign y[i] = (x_i == 'b0);
-      end
+      end: linc
     endcase
 
   end : first_BIT_GEN
   else if (i == (W - 1)) begin : last_BIT_GEN
 
     case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
-      2'b00: begin
+      2'b00: begin: rex
         // Right exclusive
         assign y[i] = 1'b0;
-      end
-      2'b01: begin
+      end: rex
+      2'b01: begin: lex
         // Left exclusive
         assign y[i] = (x_i != i[X_W - 1:0]);
-      end
-      2'b10: begin
+      end: lex
+      2'b10: begin: rinc
         // Right inclusive
         assign y[i] = (x_i == i[X_W - 1:0]);
-      end
-      2'b11: begin
+      end: rinc
+      2'b11: begin: linc
         // Left inclusive
         assign y[i] = 1'b1;
-      end
+      end: linc
     endcase
 
   end : last_BIT_GEN
   else begin : other_BITS_GEN
 
     case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
-      2'b00: begin
+      2'b00: begin: rex
         // Right exclusive
         assign y[i] = (x_i > i[X_W - 1:0]);
-      end
-      2'b01: begin
+      end: rex
+      2'b01: begin: lex
         // Left exclusive
         assign y[i] = (x_i < i[X_W - 1:0]);
-      end
-      2'b10: begin
+      end: lex
+      2'b10: begin: rinc
         // Right inclusive
         assign y[i] = (x_i >= i[X_W - 1:0]);
-      end
-      2'b11: begin
+      end: rinc
+      2'b11: begin: linc
         // Left inclusive
         assign y[i] = (x_i <= i[X_W - 1:0]);
-      end
+      end: linc
     endcase
 
   end : other_BITS_GEN

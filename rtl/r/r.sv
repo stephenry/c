@@ -83,11 +83,11 @@ module r #(
 // ========================================================================= //
 
 logic [W - 1:0]                        res_1;
-logic [$clog2(W):0]                    shift_1;
+logic [$clog2(W) - 1:0]                shift_1;
 logic [W - 1:0]                        res_2;
 logic [W - 1:0]                        res_3;
 logic [W - 1:0]                        res_4;
-logic [$clog2(W):0]                    shift_4;
+logic [$clog2(W) - 1:0]                shift_4;
 
 logic                                  any;
 logic [W - 1:0]                        y;
@@ -111,14 +111,14 @@ logic [$clog2(W) - 1:0]                y_enc;
 //     0010_1100_1110_1001                                 // (1)
 //                       ^
 //
-assign shift_1 = W[$clog2(W):0] - {1'b0, pos_i};
+assign shift_1 = W[$clog2(W) - 1:0] - pos_i;
 
 if (INFER) begin : gen_infer_bs
 
   // Use inferred shifter/rotator.
   bsi #(.W(W), .P_ARITH(1'b0), .P_ROTATE(1'b1), .P_RIGHT(1'b0)) u_bsi_1 (
     .x_i             (x_i)
-  , .shift_i         (shift_1[$clog2(W) - 1:0])
+  , .shift_i         (shift_1)
   , .y_o             (res_1));
 
 end
@@ -127,7 +127,7 @@ else begin : gen_explicit_bs
   // Use explicit shifter/rotator.
   bs #(.W(W)) u_bs_1 (
     .x_i             (x_i)
-  , .shift_i         (shift_1[$clog2(W) - 1:0])
+  , .shift_i         (shift_1)
   , .is_arith_i      (1'b0)
   , .is_rotate_i     (1'b1)
   , .is_right_i      (1'b0)
@@ -156,14 +156,14 @@ pri #(.W(W), .FROM_LSB(1'b0)) u_pri_3 (.i_x(res_2), .o_y(res_3));
 //
 // The 1-hot output indicates the first '0' succeeding pos_i.
 //
-assign shift_4 = W[$clog2(W):0] - {1'b0, pos_i};
+assign shift_4 = W[$clog2(W) - 1:0] - pos_i;
 
 if (INFER) begin : gen_infer_bs_4
 
   // Use inferred shifter/rotator.
   bsi #(.W(W), .P_ARITH(1'b0), .P_ROTATE(1'b1), .P_RIGHT(1'b1)) u_bsi_4 (
     .x_i             (res_3)
-  , .shift_i         (shift_4[$clog2(W) - 1:0])
+  , .shift_i         (shift_4)
   , .y_o             (res_4));
 
 end
@@ -172,7 +172,7 @@ else begin : gen_explicit_bs_4
   // Use explicit shifter/rotator.
   bs #(.W(W)) u_bs_4 (
     .x_i             (res_3)
-  , .shift_i         (shift_4[$clog2(W) - 1:0])
+  , .shift_i         (shift_4)
   , .is_arith_i      (1'b0)
   , .is_rotate_i     (1'b1)
   , .is_right_i      (1'b1)

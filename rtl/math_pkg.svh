@@ -30,9 +30,11 @@
 
 package math_pkg;
 
+// verilator lint_off UNUSEDSIGNAL
 function automatic int div_ceil(int n, int d);
   return (n + d - 1) / d;
 endfunction : div_ceil
+// verilator lint_on UNUSEDSIGNAL
 
 endpackage : math_pkg
 

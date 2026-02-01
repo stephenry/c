@@ -26,6 +26,7 @@ packages = [
 driver = "tb.cli:main"
 regress = "tb.regress:run"
 synthesize = "syn.cli:main"
+lint = "lint.cli:lint_all"
 
 [dependency-groups]
 dev = [

@@ -54,9 +54,6 @@
 module n #(
   // Vector width
   parameter int W = 32
-
-// Infer shifter/rotator
-, parameter bit INFER = 1'b0
 ) (
   input wire logic [W - 1:0]                     x_i
 , input wire logic [$clog2(W) - 1:0]             pos_i
