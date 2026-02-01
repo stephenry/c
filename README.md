@@ -78,7 +78,7 @@ designs are themselves fully combinatorial, they are flop bounded
 in the testbench top-level. The diagram shown above therefore illustrates
 the two-cycle latency between input to output. Test cases are as follows:
 
-### [Directed](./src/tb/tests.py) 
+### [Directed](./src/tb/tests.py)
 To test the specific input stimulus cases as presented in the "Problemm Statement" section of this document.
 
 ### [Randomized](./src/tb/tests.py)
