@@ -53,7 +53,7 @@
 
 module s #(
   // Vector width
-  parameter int W = 32
+  parameter int W = `C_FLOW__TOP_W
 ) (
   input wire logic [W - 1:0]                     x_i
 , input wire logic [$clog2(W) - 1:0]             pos_i

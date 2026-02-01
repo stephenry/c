@@ -34,4 +34,8 @@
 // Default nettype
 `default_nettype none
 
+`ifndef C_FLOW__OVERRIDE_TOP_W
+  `define C_FLOW__TOP_W 32
+`endif
+
 `endif // RTL_COMMON_DEFS_SVH

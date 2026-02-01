@@ -63,6 +63,8 @@ logic                                      vld;
 case (W)
   2: begin : e_select_w2
 
+// svlint off style_textwidth
+
 //! PLA_BEGIN
 //! .i cin_i sel_i[1:0] x_i[1:0] 
 //! .o vld y_o[1:0]
@@ -75,9 +77,13 @@ case (W)
 //! .e
 //! PLA_END
 
+// svlint on style_textwidth
+
   end : e_select_w2
 
   3: begin : e_select_w3
+
+// svlint off style_textwidth
 
 //! PLA_BEGIN
 //! .i cin_i sel_i[2:0] x_i[2:0] 
@@ -94,9 +100,13 @@ case (W)
 //! .e
 //! PLA_END
 
+// svlint on style_textwidth
+
   end : e_select_w3
 
   4: begin : e_select_w4
+
+// svlint off style_textwidth
 
 //! PLA_BEGIN
 //! .i cin_i sel_i[3:0] x_i[3:0] 
@@ -117,9 +127,13 @@ case (W)
 //! .e
 //! PLA_END
 
+// svlint on style_textwidth
+
   end : e_select_w4
 
   5: begin : e_select_w5
+
+// svlint off style_textwidth
 
 //! PLA_BEGIN
 //! .i cin_i sel_i[4:0] x_i[4:0] 
@@ -145,9 +159,13 @@ case (W)
 //! .e
 //! PLA_END
 
+// svlint on style_textwidth
+
   end : e_select_w5
 
   6: begin : e_select_w6
+
+// svlint off style_textwidth
 
 //! PLA_BEGIN
 //! .i cin_i sel_i[5:0] x_i[5:0] 
@@ -179,9 +197,13 @@ case (W)
 //! .e
 //! PLA_END
 
+// svlint on style_textwidth
+
   end : e_select_w6
 
   7: begin : e_select_w7
+
+// svlint off style_textwidth
 
 //! PLA_BEGIN
 //! .i cin_i sel_i[6:0] x_i[6:0] 
@@ -220,9 +242,13 @@ case (W)
 //! .e
 //! PLA_END
 
+// svlint on style_textwidth
+
   end : e_select_w7
 
   8: begin : e_select_w8
+
+// svlint off style_textwidth
 
 //! PLA_BEGIN
 //! .i cin_i sel_i[7:0] x_i[7:0] 
@@ -268,6 +294,8 @@ case (W)
 //!
 //! .e
 //! PLA_END
+
+// svlint on style_textwidth
 
   end : e_select_w8
 

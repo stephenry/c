@@ -53,7 +53,7 @@
 
 module r #(
   // Vector width
-  parameter int W = 32
+  parameter int W = `C_FLOW__TOP_W
 
 // Infer shifter/rotator
 , parameter bit INFER = 1'b1

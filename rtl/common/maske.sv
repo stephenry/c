@@ -68,82 +68,77 @@ logic [W - 1:0]                        y;
 // comparisons become constant. Constant expressions for certain indices
 // are okay in a loop, but some linters complain about them, so they have
 // to be written out explicitly.
-//
-generate begin : mask_GEN
-  
-  for (genvar i = 0; i < W; i++) begin : idx_GEN
+//  
+for (genvar i = 0; i < W; i++) begin : idx_GEN
 
-  if (i == 0) begin : first_BIT_GEN
+if (i == 0) begin : first_BIT_GEN
 
-    case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
-      2'b00: begin: rex
-        // Right exclusive
-        assign y[i] = (x_i != 'b0);
-      end: rex
-      2'b01: begin: lex
-        // Left exclusive
-        assign y[i] = 1'b0;
-      end: lex
-      2'b10: begin: rinc
-        // Right inclusive
-        assign y[i] = 1'b1;
-      end: rinc
-      2'b11: begin: linc
-        // Left inclusive
-        assign y[i] = (x_i == 'b0);
-      end: linc
-    endcase
+  case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
+    2'b00: begin: rex
+      // Right exclusive
+      assign y[i] = (x_i != 'b0);
+    end: rex
+    2'b01: begin: lex
+      // Left exclusive
+      assign y[i] = 1'b0;
+    end: lex
+    2'b10: begin: rinc
+      // Right inclusive
+      assign y[i] = 1'b1;
+    end: rinc
+    2'b11: begin: linc
+      // Left inclusive
+      assign y[i] = (x_i == 'b0);
+    end: linc
+  endcase
 
-  end : first_BIT_GEN
-  else if (i == (W - 1)) begin : last_BIT_GEN
+end : first_BIT_GEN
+else if (i == (W - 1)) begin : last_BIT_GEN
 
-    case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
-      2'b00: begin: rex
-        // Right exclusive
-        assign y[i] = 1'b0;
-      end: rex
-      2'b01: begin: lex
-        // Left exclusive
-        assign y[i] = (x_i != i[X_W - 1:0]);
-      end: lex
-      2'b10: begin: rinc
-        // Right inclusive
-        assign y[i] = (x_i == i[X_W - 1:0]);
-      end: rinc
-      2'b11: begin: linc
-        // Left inclusive
-        assign y[i] = 1'b1;
-      end: linc
-    endcase
+  case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
+    2'b00: begin: rex
+      // Right exclusive
+      assign y[i] = 1'b0;
+    end: rex
+    2'b01: begin: lex
+      // Left exclusive
+      assign y[i] = (x_i != i[X_W - 1:0]);
+    end: lex
+    2'b10: begin: rinc
+      // Right inclusive
+      assign y[i] = (x_i == i[X_W - 1:0]);
+    end: rinc
+    2'b11: begin: linc
+      // Left inclusive
+      assign y[i] = 1'b1;
+    end: linc
+  endcase
 
-  end : last_BIT_GEN
-  else begin : other_BITS_GEN
+end : last_BIT_GEN
+else begin : other_BITS_GEN
 
-    case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
-      2'b00: begin: rex
-        // Right exclusive
-        assign y[i] = (x_i > i[X_W - 1:0]);
-      end: rex
-      2'b01: begin: lex
-        // Left exclusive
-        assign y[i] = (x_i < i[X_W - 1:0]);
-      end: lex
-      2'b10: begin: rinc
-        // Right inclusive
-        assign y[i] = (x_i >= i[X_W - 1:0]);
-      end: rinc
-      2'b11: begin: linc
-        // Left inclusive
-        assign y[i] = (x_i <= i[X_W - 1:0]);
-      end: linc
-    endcase
+  case ({P_INCLUSIVE, LEFT_NOT_RIGHT})
+    2'b00: begin: rex
+      // Right exclusive
+      assign y[i] = (x_i > i[X_W - 1:0]);
+    end: rex
+    2'b01: begin: lex
+      // Left exclusive
+      assign y[i] = (x_i < i[X_W - 1:0]);
+    end: lex
+    2'b10: begin: rinc
+      // Right inclusive
+      assign y[i] = (x_i >= i[X_W - 1:0]);
+    end: rinc
+    2'b11: begin: linc
+      // Left inclusive
+      assign y[i] = (x_i <= i[X_W - 1:0]);
+    end: linc
+  endcase
 
-  end : other_BITS_GEN
+end : other_BITS_GEN
 
-  end : idx_GEN
-
-end endgenerate
-
+end : idx_GEN
 
 // ========================================================================== //
 //                                                                            //

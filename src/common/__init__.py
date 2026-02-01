@@ -26,7 +26,7 @@
 ## ========================================================================= ##
 
 from .rtl import render_rtl, ALL_PROJECTS
-from .env import PROJECT_ROOT, setup_verilator, setup_abc
+from .env import PROJECT_ROOT, setup_verilator, setup_abc, setup_svlint
 
 __all__ = (
     # rtl:
@@ -36,4 +36,5 @@ __all__ = (
     "PROJECT_ROOT",
     "setup_verilator",
     "setup_abc",
+    "setup_svlint",
 )

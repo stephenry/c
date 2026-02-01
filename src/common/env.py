@@ -48,6 +48,27 @@ def _project_root(anchor: str = "README.md") -> pathlib.Path:
 # Project root directory
 PROJECT_ROOT: pathlib.Path = _project_root("README.md")
 
+def setup_svlint() -> pathlib.Path | None:
+    # Search global SVLINT_PATH environment variable.
+    svlint_path = os.environ.get("SVLINT_EXE")
+    if svlint_path:
+        return pathlib.Path(svlint_path)
+
+    # Otherwise, search path
+    if svlint := shutil.which("svlint"):
+        return pathlib.Path(svlint).resolve()
+
+    # Otherwise, search some known paths
+    paths = [pathlib.Path("/Users/shenry/.cargo/bin")]
+
+    for path in paths:
+        svlint = path / "svlint"
+        if svlint.exists():
+            return svlint
+
+    # SVLINT not found.
+    return None
+
 
 def setup_verilator() -> pathlib.Path | None:
     # Search global VERILATOR_ROOT environment variable.

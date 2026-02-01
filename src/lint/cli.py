@@ -31,7 +31,7 @@ import subprocess
 import sys
 
 
-def lint_one(v_exe: pathlib.Path, project: str, w: int) -> int:
+def lint_one_verilator(v_exe: pathlib.Path, project: str, w: int) -> int:
     print(f"Linting project={project} w={w}...")
 
     lint_root = common.PROJECT_ROOT / "build_lint" / f"{project}_w{w}"
@@ -42,7 +42,8 @@ def lint_one(v_exe: pathlib.Path, project: str, w: int) -> int:
     commands_list = [
         "--lint-only",
         "-Wall",
-        f"-GW={w}",
+        "-DC_FLOW__OVERRIDE_TOP_W"
+        f"-DC_FLOW__TOP_W={w}",
         f'--top-module "{project}"',
         "--unused-regexp UNUSED_*",
     ]
@@ -57,8 +58,7 @@ def lint_one(v_exe: pathlib.Path, project: str, w: int) -> int:
     cp = subprocess.run([str(v_exe), "-f", str(command_file)])
     return cp.returncode == 0
 
-
-def lint_all() -> int:
+def lint_all_verilator() -> int:
     v_exe = common.setup_verilator()
     if not v_exe:
         # Verilator not found, cannot proceed.
@@ -68,7 +68,48 @@ def lint_all() -> int:
 
         for w in range(4, 64, 10):
 
-            if not lint_one(v_exe, project, w):
+            if not lint_one_verilator(v_exe, project, w):
+                print(f"Linting failed for project={project} w={w}")
+                return 1
+
+    print(f"Linting PASS!")
+    return 0
+
+def lint_one_svlint(svlint_exe: pathlib.Path, project: str, w: int) -> int:
+    print(f"Linting project={project} w={w}...")
+
+    lint_root = common.PROJECT_ROOT / "build_lint" / f"{project}_w{w}"
+    lint_root.mkdir(parents=True, exist_ok=True)
+
+    filelist, included_dirs = common.render_rtl(project, lint_root)
+
+    commands_list = [
+        "+define+C_FLOW__OVERRIDE_TOP_W",
+        f"+define+C_FLOW__TOP_W={w}",
+    ]
+    commands_list.extend([f"+incdir+{str(d)}" for d in included_dirs])
+    commands_list.extend([str(f) for f in filelist])
+
+    command_file = lint_root / "svlint_cmds.txt"
+    with command_file.open("w") as f:
+        for cmd in commands_list:
+            f.write(cmd + "\n")
+
+    cp = subprocess.run([str(svlint_exe), "-f", str(command_file)])
+    return cp.returncode == 0
+
+def lint_all_svlint() -> int:
+    svlint_exe = common.setup_svlint()
+    if not svlint_exe:
+        # SVLINT not found, cannot proceed.
+        return 1
+
+    for project in common.ALL_PROJECTS:
+
+        for w in range(4, 64, 10):
+            print(f"Linting {project} w={w}...")
+
+            if not lint_one_svlint(svlint_exe, project, w):
                 print(f"Linting failed for project={project} w={w}")
                 return 1
 
@@ -77,4 +118,4 @@ def lint_all() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(lint_all())
+    sys.exit(lint_all_svlint())
