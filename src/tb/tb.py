@@ -60,7 +60,7 @@ def compile_and_run(
         waves=True,
         includes=include_dirs,
         parameters=parameters,
-        build_args=["--trace", "--timing"],
+        build_args=["--trace", "--timing", "-Wall"],
     )
 
     test_module = pathlib.Path(__file__).parent / "tests.py"

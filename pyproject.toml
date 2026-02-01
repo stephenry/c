@@ -27,6 +27,7 @@ driver = "tb.cli:main"
 regress = "tb.regress:run"
 synthesize = "syn.cli:main"
 lint = "lint.cli:lint_all_svlint"
+vlint = "lint.cli:lint_all_verilator"
 
 [dependency-groups]
 dev = [

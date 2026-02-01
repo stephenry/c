@@ -73,7 +73,10 @@ logic [$clog2(W) - 1:0]         out_y_enc_r;
 // VPI related crash occurs. This is a known issue when using Verilator
 // with cocotb.
 
-logic clk = 0;
+logic clk;
+
+initial
+  clk = 0;
 
 always #5 clk = ~clk;
 
