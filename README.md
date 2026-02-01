@@ -2,8 +2,7 @@
 
 ## Synopsis
 
-This project presents a Power-/Performance-/Area- (PPA) analysis of various
-solutions to a simple logic design puzzle.
+PPA comparison of four RTL styles for offset leading-zero detection using cocotb verification and open-source synthesis flow.
 
 ## Problem Statement
 
