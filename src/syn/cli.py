@@ -48,17 +48,21 @@ F_SWEEP_MHZ = range(10, 200, 10)
 
 BUILD_ROOT = pathlib.Path("build")
 
+
 def _compute_dir(design: str, params: plist) -> pathlib.Path:
     dir_name = design
     for param, value in params.items():
         dir_name += f"_{param}{value}"
     return (BUILD_ROOT / dir_name).resolve()
 
+
 def _compute_rtl_dir(design: str, params: plist) -> pathlib.Path:
     return _compute_dir(design, params) / "rtl"
 
+
 def _compute_build_dir(design: str, params: plist) -> pathlib.Path:
     return _compute_dir(design, params) / "syn"
+
 
 def _width_parameterization():
 
@@ -191,16 +195,20 @@ def main(args: list[str] = None):
                 f"{param}{value}" for param, value in params.items()
             )
 
-        results[project].append({
-            "name": _canonical_run_name(project, params),
-            "params": params,
-            "comb_area": (total_area - sequential_area),
-            "sequential_area": sequential_area,
-            "f_max_mhz": f_max,
-        })
+        results[project].append(
+            {
+                "name": _canonical_run_name(project, params),
+                "params": params,
+                "comb_area": (total_area - sequential_area),
+                "sequential_area": sequential_area,
+                "f_max_mhz": f_max,
+            }
+        )
 
     from .plot import plot_results
+
     plot_results(common.PROJECT_ROOT / "docs" / "sweep.png", W_SWEEP, results)
+
 
 if __name__ == "__main__":
     main()

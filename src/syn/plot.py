@@ -29,6 +29,7 @@ import pathlib
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
+
 def plot_results(plotpath: pathlib.Path, w_sweep: list[int], results: dict) -> None:
 
     area = defaultdict(list)
@@ -41,21 +42,21 @@ def plot_results(plotpath: pathlib.Path, w_sweep: list[int], results: dict) -> N
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
     for label, areas in area.items():
-        ax1.plot(w_sweep, areas, marker='o', label=label)
-    ax1.set_ylabel('Cell Area (µm²)')
+        ax1.plot(w_sweep, areas, marker="o", label=label)
+    ax1.set_ylabel("Cell Area (µm²)")
     ax1.grid(True, ls="--", alpha=0.7)
     ax1.legend(ncol=2)
 
     for label, f_maxs in frequency.items():
-        ax2.plot(w_sweep, f_maxs, marker='s', label=label)
-    ax2.set_xlabel('Width (W)')
-    ax2.set_ylabel('Max Frequency (MHz)')
+        ax2.plot(w_sweep, f_maxs, marker="s", label=label)
+    ax2.set_xlabel("Width (W)")
+    ax2.set_ylabel("Max Frequency (MHz)")
     ax2.grid(True, ls="--", alpha=0.7)
-    ax2.set_xscale('log', base=2)
+    ax2.set_xscale("log", base=2)
     ax2.set_xticks(w_sweep)
     ax2.set_xticklabels(w_sweep)
 
-    plt.suptitle('PPA Comparison vs. Vector Width (Sky130 HD, Slow Corner)')
+    plt.suptitle("PPA Comparison vs. Vector Width (Sky130 HD, Slow Corner)")
     plt.tight_layout()
 
     plt.savefig(plotpath, dpi=300)

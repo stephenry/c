@@ -30,6 +30,7 @@ import pathlib
 import subprocess
 import sys
 
+
 def lint_one(v_exe: pathlib.Path, project: str, w: int) -> int:
     print(f"Linting project={project} w={w}...")
 
@@ -39,11 +40,11 @@ def lint_one(v_exe: pathlib.Path, project: str, w: int) -> int:
     filelist, included_dirs = common.render_rtl(project, lint_root)
 
     commands_list = [
-        '--lint-only',
-        '-Wall',
+        "--lint-only",
+        "-Wall",
         f"-GW={w}",
         f'--top-module "{project}"',
-        '--unused-regexp UNUSED_*'
+        "--unused-regexp UNUSED_*",
     ]
     commands_list.extend([f"-I{str(d)}" for d in included_dirs])
     commands_list.extend([str(f) for f in filelist])
@@ -56,12 +57,13 @@ def lint_one(v_exe: pathlib.Path, project: str, w: int) -> int:
     cp = subprocess.run([str(v_exe), "-f", str(command_file)])
     return cp.returncode == 0
 
+
 def lint_all() -> int:
     v_exe = common.setup_verilator()
     if not v_exe:
-        # Verilator not found, cannot proceed.
+        # Verilator not found, cannot proceed.
         return 1
-    
+
     for project in common.ALL_PROJECTS:
 
         for w in range(4, 64, 10):
@@ -69,9 +71,10 @@ def lint_all() -> int:
             if not lint_one(v_exe, project, w):
                 print(f"Linting failed for project={project} w={w}")
                 return 1
-            
+
     print(f"Linting PASS!")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(lint_all())

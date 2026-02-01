@@ -32,6 +32,7 @@ import random
 
 random.seed(42)
 
+
 async def reset_sequence(dut, cycles_n: int) -> None:
     dut.arst_n.value = 1
     await RisingEdge(dut.clk)
@@ -48,6 +49,7 @@ async def await_cycles(dut, cycles_n: int) -> None:
     for _ in range(cycles_n):
         await RisingEdge(dut.clk)
 
+
 async def driver(dut, test_cases):
     # Drive stimulus
     for x, pos in test_cases:
@@ -59,25 +61,29 @@ async def driver(dut, test_cases):
     dut.pos_i.value = 0
     await RisingEdge(dut.clk)
 
+
 async def checker(dut, expected):
 
     for _ in range(2):
         await FallingEdge(dut.clk)
-    
+
     for y_exp, y_enc_exp, any_exp in expected:
         await FallingEdge(dut.clk)
 
         any_actual = dut.any_o.value
-        assert any_actual == any_exp, \
-            f"any_o mismatch: expected {any_exp}, got {any_actual}"
+        assert (
+            any_actual == any_exp
+        ), f"any_o mismatch: expected {any_exp}, got {any_actual}"
 
         if any_actual:
-            # Then, check results.
-            assert y_exp == dut.y_o.value, \
-                f"y_o mismatch: expected {y_exp}, got {dut.y_o.value}"
+            # Then, check results.
+            assert (
+                y_exp == dut.y_o.value
+            ), f"y_o mismatch: expected {y_exp}, got {dut.y_o.value}"
 
-            assert y_enc_exp == dut.y_enc_o.value, \
-                f"y_enc_o mismatch: expected {y_enc_exp}, got {dut.y_enc}"
+            assert (
+                y_enc_exp == dut.y_enc_o.value
+            ), f"y_enc_o mismatch: expected {y_enc_exp}, got {dut.y_enc}"
 
 
 def generate_stimulus(w, x, pos):
@@ -90,6 +96,7 @@ def generate_stimulus(w, x, pos):
 
     return x_la, pos_la
 
+
 def generate_expected(w, x, pos):
     assert pos.to_unsigned() < w.to_unsigned(), "Position out of range"
 
@@ -98,14 +105,14 @@ def generate_expected(w, x, pos):
     W = w.to_unsigned()
     Y_ENC_W = (W - 1).bit_length()
 
-    # Any:
-    any_cond = (x != ct.LogicArray(W * '1', range=W))
+    # Any:
+    any_cond = x != ct.LogicArray(W * "1", range=W)
     any_l = ct.Logic(any_cond)
 
-    # Don't care by default.
-    y = ct.LogicArray(W * '0', range=W)
-    y_enc = ct.LogicArray(Y_ENC_W * '0', range=Y_ENC_W)
-    
+    # Don't care by default.
+    y = ct.LogicArray(W * "0", range=W)
+    y_enc = ct.LogicArray(Y_ENC_W * "0", range=Y_ENC_W)
+
     if any_cond:
         for i in range(W):
             j = (pos.to_unsigned() - i - 1) % W
@@ -115,6 +122,7 @@ def generate_expected(w, x, pos):
                 break
 
     return y, y_enc, any_l
+
 
 async def generic_testbench(dut, test_cases):
 
@@ -130,11 +138,13 @@ async def generic_testbench(dut, test_cases):
     for a, b in zip(stimulus, expected):
         x, pos = a
         y, y_enc, any_o = b
-        dut._log.info(f"Stimulus: x={x}, pos={pos} => Expected: y={y}, y_enc={y_enc}, any_o={any_o}")
+        dut._log.info(
+            f"Stimulus: x={x}, pos={pos} => Expected: y={y}, y_enc={y_enc}, any_o={any_o}"
+        )
 
     tasks = [
         cocotb.start_soon(driver(dut, stimulus)),
-        cocotb.start_soon(checker(dut, expected))
+        cocotb.start_soon(checker(dut, expected)),
     ]
 
     await cocotb.triggers.Combine(*tasks)
@@ -157,7 +167,7 @@ async def test_directed(dut):
     # Perform reset
     await reset_sequence(dut, cycles_n=5)
 
-    # Generate stimulus form RTL top-level header; constrained for W=16 only.
+    # Generate stimulus form RTL top-level header; constrained for W=16 only.
     directed = [
         (0xFFFE, 0),
         (0x0000, 0),
@@ -168,6 +178,7 @@ async def test_directed(dut):
     ]
 
     await generic_testbench(dut, directed)
+
 
 @cocotb.test()
 async def test_randomized(dut):
@@ -188,6 +199,7 @@ async def test_randomized(dut):
 
     await generic_testbench(dut, stimulus)
 
+
 @cocotb.test()
 async def test_edge_cases(dut):
     import cocotb.types as ct
@@ -202,7 +214,7 @@ async def test_edge_cases(dut):
     for i in range(W):
         stimulus.append((all_zeros, i))
 
-    all_ones  = (1 << W) - 1
+    all_ones = (1 << W) - 1
     for i in range(W):
         stimulus.append((all_ones, i))
 

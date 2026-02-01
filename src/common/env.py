@@ -29,6 +29,7 @@ import pathlib
 import os
 import shutil
 
+
 def _project_root(anchor: str = "README.md") -> pathlib.Path:
 
     def _recurse(path: pathlib.Path) -> pathlib.Path:
@@ -49,19 +50,19 @@ PROJECT_ROOT: pathlib.Path = _project_root("README.md")
 
 
 def setup_verilator() -> pathlib.Path | None:
-    # Search global VERILATOR_ROOT environment variable.
+    # Search global VERILATOR_ROOT environment variable.
     verilator_root = os.environ.get("VERILATOR_ROOT")
     if verilator_root:
         verilator = pathlib.Path(verilator_root) / "bin" / "verilator"
         os.environ["PATH"] += os.pathsep + str(verilator.parent)
         return verilator
 
-    # Otherwise, search path
+    # Otherwise, search path
     if verilator := shutil.which("verilator"):
         verilator_path = pathlib.Path(verilator).resolve()
         os.environ["VERILATOR_ROOT"] = str(verilator_path.parent.parent)
         return verilator
-    
+
     # Otherwise, search some known paths
     paths = [
         pathlib.Path("/Users/shenry/github/verilator/"),
@@ -74,27 +75,26 @@ def setup_verilator() -> pathlib.Path | None:
             os.environ["PATH"] += os.pathsep + str(verilator.parent)
             return verilator
 
-    # Verilator not found.    
+    # Verilator not found.
     return None
 
+
 def setup_abc() -> pathlib.Path | None:
-    # Search global ABC_PATH environment variable.
+    # Search global ABC_PATH environment variable.
     abc_path = os.environ.get("ABC_EXE")
     if abc_path:
         abc = pathlib.Path(abc_path)
         os.environ["PATH"] += os.pathsep + str(abc.parent)
         return abc
 
-    # Otherwise, search path
+    # Otherwise, search path
     if abc := shutil.which("abc"):
         abc_path = pathlib.Path(abc).resolve()
         os.environ["ABC_EXE"] = str(abc_path)
         return abc
 
     # Otherwise, search some known paths
-    paths = [
-        pathlib.Path("/Users/shenry/github/abc")
-    ]
+    paths = [pathlib.Path("/Users/shenry/github/abc")]
 
     for path in paths:
         abc = path / "abc"
@@ -103,5 +103,5 @@ def setup_abc() -> pathlib.Path | None:
             os.environ["PATH"] += os.pathsep + str(abc.parent)
             return abc
 
-    # ABC not found.    
+    # ABC not found.
     return None

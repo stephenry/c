@@ -32,7 +32,6 @@ __all__ = (
     # rtl:
     "render_rtl",
     "ALL_PROJECTS",
-
     # env:
     "PROJECT_ROOT",
     "setup_verilator",

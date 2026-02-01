@@ -161,7 +161,7 @@ def render_top(
     with open(out_path, "w") as f:
         f.write(
             template.render(
-                module_name=_TOP_MODULE, 
+                module_name=_TOP_MODULE,
                 uut=uut,
                 uut_parameters=uut_parameters,
                 W=params["W"],

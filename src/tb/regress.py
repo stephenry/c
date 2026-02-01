@@ -30,6 +30,7 @@ import sys
 import os
 import common
 
+
 def setup_environment():
     if v := common.setup_verilator():
         print(f"Found Verilator installation: {v}")
@@ -48,7 +49,7 @@ def run():
     try:
         setup_environment()
 
-        # (W)idth sweep values
+        # (W)idth sweep values
         WS = [4, 8, 16, 32, 64, 128]
 
         for project in common.ALL_PROJECTS:

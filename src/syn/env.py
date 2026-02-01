@@ -27,9 +27,10 @@
 
 import pathlib
 
-_tech = 'sky130_fd_sc_hd'
+_tech = "sky130_fd_sc_hd"
 
-_corner = 'sky130_fd_sc_hd__ss_100C_1v60.lib'
+_corner = "sky130_fd_sc_hd__ss_100C_1v60.lib"
 
-STDCELL_LIB_PATH = \
-  pathlib.Path.home() / '.volare/sky130A/libs.ref' / _tech / 'lib' / _corner
+STDCELL_LIB_PATH = (
+    pathlib.Path.home() / ".volare/sky130A/libs.ref" / _tech / "lib" / _corner
+)

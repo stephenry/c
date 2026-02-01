@@ -60,9 +60,11 @@ parser.add_argument(
     help="Width (W) parameter for the design under test",
 )
 
+
 def main():
     try:
         from .tb import run_testbench
+
         args = parser.parse_args()
 
         sys.exit(run_testbench(args.project, w=args.width))

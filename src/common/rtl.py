@@ -53,8 +53,7 @@ _PROJECTS = {
 }
 
 for project, files in _PROJECTS.items():
-    _PROJECTS[project] = [
-        (PROJECT_ROOT / "rtl" / project / f).resolve() for f in files]
+    _PROJECTS[project] = [(PROJECT_ROOT / "rtl" / project / f).resolve() for f in files]
 
 ALL_PROJECTS = _PROJECTS.keys()
 
@@ -87,6 +86,7 @@ for i, f in enumerate(_INCLUDE_FILES):
 
 
 from .env import setup_abc
+
 _ABC_EXE = setup_abc()
 
 
@@ -273,7 +273,9 @@ def _render_one_file(src: pathlib.Path, dest: pathlib.Path) -> None:
             _render_pass(i, o)
 
 
-def _render_file_list(file_list: list[pathlib.Path], out_dir: pathlib.Path) -> list[pathlib.Path]:
+def _render_file_list(
+    file_list: list[pathlib.Path], out_dir: pathlib.Path
+) -> list[pathlib.Path]:
     build_list = list()
 
     if not os.path.exists(out_dir):
@@ -300,8 +302,6 @@ def render_rtl(
 
     include_dirs = set()
     include_dirs.add(out_dir)
-    include_dirs.update(
-        os.path.dirname(file) for file in _INCLUDE_FILES
-    )
+    include_dirs.update(os.path.dirname(file) for file in _INCLUDE_FILES)
 
     return (build_list, list(include_dirs))

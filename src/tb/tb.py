@@ -50,8 +50,8 @@ def compile_and_run(
 
     build_dir = f"build_{project}_w{w}/tb"
 
-    # cocotb runner expects verilator to be in the PATH
-    # at this point.
+    # cocotb runner expects verilator to be in the PATH
+    # at this point.
     runner = get_runner("verilator")
     runner.build(
         sources=sources,
@@ -87,7 +87,7 @@ def run_testbench(project: str, w: int) -> bool:
 
 def driver():
 
-    for project in ["e"]:        
+    for project in ["e"]:
         for w in [8]:
             print(f"Running testbench for project '{project}' with width {w}")
             success = run_testbench(project, w=w)
