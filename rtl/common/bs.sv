@@ -60,12 +60,7 @@ localparam int ROUND_MSB = (ROUND_BITS - 1);
 localparam int ROUND_LSB = 0;
 
 logic                                       do_sign_extend;
-
-logic [ROUND_MSB:ROUND_LSB]                 round_l [SHIFT_W:0];
-logic [ROUND_MSB:ROUND_LSB]                 round_r [SHIFT_W:0];
-// verilator lint_off UNOPTFLAT
-logic [ROUND_MSB:ROUND_LSB]                 round   [SHIFT_W:0];
-// verilator lint_on UNOPTFLAT
+logic [ROUND_MSB:ROUND_LSB]                 round_ext;
 
 logic [2:0]                                 sel;
 logic [W - 1:0]                             y;
@@ -81,11 +76,17 @@ logic [W - 1:0]                             y;
 assign do_sign_extend =
   (is_arith_i & is_right_i & (~is_rotate_i) & x_i[W - 1]);
 
-assign round[SHIFT_W] = { {W{do_sign_extend}}, x_i, {W{1'b0}} };
+// -------------------------------------------------------------------------- //
+//
+assign round_ext = { {W{do_sign_extend}}, x_i, {W{1'b0}} };
 
 // -------------------------------------------------------------------------- //
 //
 for (genvar sh = (SHIFT_W - 1); sh >= 0; sh--) begin : sh_GEN
+
+logic [ROUND_MSB:ROUND_LSB]                 round_l;
+logic [ROUND_MSB:ROUND_LSB]                 round_r;
+logic [ROUND_MSB:ROUND_LSB]                 round;
 
 localparam int STRIDE = (1 << sh);
 
@@ -94,16 +95,23 @@ localparam int STRIDE = (1 << sh);
 localparam int L_INDEX = (i - STRIDE);
 localparam int R_INDEX = (i + STRIDE);
 
-assign round_l[sh + 1][i] = 
-  (L_INDEX >= ROUND_LSB) ? round[sh + 1][L_INDEX] : 1'b0;
-
-assign round_r[sh + 1][i] = 
-  (R_INDEX <= ROUND_MSB) ? round[sh + 1][R_INDEX] : 1'b0;
+assign round_l[i] = (L_INDEX >= ROUND_LSB) ? round[sh + 1][L_INDEX] : 1'b0;
+assign round_r[i] = (R_INDEX <= ROUND_MSB) ? round[sh + 1][R_INDEX] : 1'b0;
 
   end : bit_GEN
 
-assign round[sh] = shift_i[sh] ? 
-  (is_right_i ? round_r[sh + 1] : round_l[sh + 1]) : round[sh + 1];
+if (sh == (SHIFT_W - 1)) begin: last_sh_GEN
+
+  assign round[sh] =
+    shift_i[sh] ? (is_right_i ? round_r : round_l) : round_ext;
+
+end: last_sh_GEN
+else begin: other_sh_GEN
+
+  assign round[sh] =
+    shift_i[sh] ? (is_right_i ? round_r : round_l) : sh_GEN[sh + 1].round;
+
+end: other_sh_GEN
 
 end : sh_GEN
 
@@ -115,7 +123,7 @@ assign sel[2] = is_rotate_i & (~is_right_i);
 assign sel[1] = 'b1;
 assign sel[0] = is_rotate_i &   is_right_i;
 
-sel #(.W(W), .N(3)) u_sel(.x_i(round[0]), .sel_i(sel), .y_o(y));
+sel #(.W(W), .N(3)) u_sel(.x_i(sh_GEN[0].round), .sel_i(sel), .y_o(y));
 
 // ========================================================================== //
 //                                                                            //
