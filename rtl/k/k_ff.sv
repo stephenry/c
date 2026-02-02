@@ -65,7 +65,8 @@ module k_ff #(
 
 logic [W - 1:0]                        p;
 logic [W - 1:0]                        g;
-logic [W - 1:0]                        c;
+logic [W - 1:0]                        p_final;
+logic [W - 1:0]                        g_final;
 logic [W - 1:0]                        y;
 
 logic                                  UNUSED__nets;
@@ -80,29 +81,29 @@ logic                                  UNUSED__nets;
 //  DETECT_ZERO: propagate carry on '1'
 // !DETECT_ZERO: propagate carry on '0'
 //
-assign p = DETECT_ZERO ?    x_i : (~x_i);
+assign p = DETECT_ZERO ? x_i : (~x_i);
 
 // ------------------------------------------------------------------------- //
 //  DETECT_ZERO: generate carry on '0'
 // !DETECT_ZERO: generate carry on '1'
 //
-assign g = DETECT_ZERO ? (~x_i) :   x_i;
+assign g = DETECT_ZERO ? (~x_i) : x_i;
 
 // ------------------------------------------------------------------------- //
 // Kogge-Stone Carry-Save Adder to compute carry-chain.
 //
-ks #(.W(W)) u_ks (.p_i(p), .g_i(g), .c_o(c));
+ks #(.W(W)) u_ks (.p_i(p), .g_i(g), .p_o(p_final), .g_o(g_final));
 
 // ------------------------------------------------------------------------- //
 //
 //
 if (DETECT_ZERO) begin: detect_zero_GEN
   // DETECT_ZERO: output '1' at first '0' position.
-  assign y = (~x_i) & {c[W - 2:0], 1'b1};
+  assign y = (~x_i) & {p_final[W - 2:0], 1'b1};
 end: detect_zero_GEN
 else begin: detect_one_GEN
   // !DETECT_ZERO: output '1' at first '1' position.
-  assign y =   x_i  & {c[W - 2:0], 1'b1};
+  assign y =   x_i  & {p_final[W - 2:0], 1'b1};
 end: detect_one_GEN
 
 
@@ -115,7 +116,7 @@ end: detect_one_GEN
 // ------------------------------------------------------------------------- //
 // Carry-out is unused.
 //
-assign UNUSED__nets = &{ c[W - 1] };
+assign UNUSED__nets = &{ g_final };
 
 // ========================================================================= //
 //                                                                           //

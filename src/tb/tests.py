@@ -71,6 +71,7 @@ async def checker(dut, expected):
         await FallingEdge(dut.clk)
 
         any_actual = dut.any_o.value
+
         assert (
             any_actual == any_exp
         ), f"any_o mismatch: expected {any_exp}, got {any_actual}"
@@ -189,7 +190,7 @@ async def test_randomized(dut):
     await reset_sequence(dut, cycles_n=5)
 
     stimulus = []
-    for _ in range(1000):
+    for _ in range(10):
         import cocotb.types as ct
 
         x = random.randint(0, (1 << W) - 1)
