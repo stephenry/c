@@ -71,6 +71,13 @@ rotation and mask logic can be avoided. This ought to result in
 good timing behaviour. As logic is duplicated proportional to O(W),
 area ought to grow linearly with 'W'.
 
+#### (K) Kogge Stone [k.sv](./rtl/k/k.sv)
+
+Design inherits the same concept of 's' but instead of an incrementer
+a Kogge-Stone prefix lookahead chain is implemented to perform '0'
+detection. Unlike a traditional Carry-Lookahead Adder, '0' detection
+requires only the propagate net of the structure. As such, the
+lookahead structure degenerates to a radix-2 AND tree.
 
 ## Verification
 
