@@ -50,6 +50,10 @@ _PROJECTS = {
         "n.sv",
         "n_pos.sv",
     ],
+    "k": [
+        "k.sv",
+        "k_ff.sv",
+    ],
 }
 
 for project, files in _PROJECTS.items():
@@ -69,6 +73,7 @@ _COMMON_FILES = [
     "sel.sv",
     "pri.sv",
     "dec.sv",
+    "ks.sv",
 ]
 
 for i, f in enumerate(_COMMON_FILES):

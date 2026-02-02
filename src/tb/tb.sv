@@ -140,6 +140,18 @@ generate begin : uut_GEN
     , .y_enc_o              (uut_y_enc_o));
 
   end : r_GEN
+  else if (P_UUT_NAME == "k") begin : k_GEN
+  
+    k #(.W(W)) u_uut (
+    //
+      .x_i                  (in_x_r)
+    , .pos_i                (in_pos_r)
+    //
+    , .any_o                (uut_any_o)
+    , .y_o                  (uut_y_o)
+    , .y_enc_o              (uut_y_enc_o));
+
+  end : k_GEN
   else begin : invalid_uut_name_GEN
     initial begin
       $error("Invalid UUT name: %s", P_UUT_NAME);
