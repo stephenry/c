@@ -23,6 +23,7 @@ packages = [
 ]
 
 [tool.poetry.scripts]
+clean = "clean.cli:main"
 driver = "tb.cli:main"
 regress = "tb.regress:run"
 synsweep = "syn.cli:run_sweep"
