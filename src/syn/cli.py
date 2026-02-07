@@ -31,19 +31,17 @@ from collections.abc import Generator
 from collections import defaultdict
 import common
 from typing import TypeAlias
+import common
 
 plist: TypeAlias = dict[str, int | str]
 
 # Trials to run
-runlist = ["n", "e", "r", "s"]
-# runlist = rtl.ALL_PROJECTS
+runlist = common.ALL_PROJECTS
 
 W_SWEEP = range(8, 64 + 1, 8)
-# W_SWEEP = [8, 16, 32, 48]
 
 RADIX_SWEEP = [4]
 
-# F_SWEEP_MHZ = [10, 30, 60, 100]
 F_SWEEP_MHZ = range(10, 200, 10)
 
 BUILD_ROOT = pathlib.Path("build")
@@ -92,6 +90,8 @@ projects = {
     "e": _width_and_radix_parameterization(),
     # Sweep .W(x) parameter
     "n": _width_parameterization(),
+    # Sweep .W(x) parameter
+    "k": _width_parameterization(),
 }
 
 

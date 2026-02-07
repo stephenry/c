@@ -52,7 +52,6 @@ def plot_results(plotpath: pathlib.Path, w_sweep: list[int], results: dict) -> N
     ax2.set_xlabel("Width (W)")
     ax2.set_ylabel("Max Frequency (MHz)")
     ax2.grid(True, ls="--", alpha=0.7)
-    ax2.set_xscale("log", base=2)
     ax2.set_xticks(w_sweep)
     ax2.set_xticklabels(w_sweep)
 
