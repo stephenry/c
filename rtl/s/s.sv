@@ -103,7 +103,6 @@ module s #(
 //                                                                           //
 // ========================================================================= //
 
-logic                                  any;
 logic [W - 1:0]                        pre_1;
 logic [W - 1:0]                        pre_2;
 logic [W - 1:0]                        pre_3;
@@ -115,9 +114,6 @@ logic [W - 1:0]                        post_1;
 logic [W - 1:0]                        post_2;
 logic [W - 1:0]                        post_3;
 logic [W - 1:0]                        post_4;
-
-logic [W - 1:0]                        y;
-logic [$clog2(W) - 1:0]                y_enc;
 
 logic                                  inc_pre_carry_o;
 logic                                  inc_post_carry_o;

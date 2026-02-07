@@ -44,6 +44,7 @@ def lint_one_verilator(v_exe: pathlib.Path, project: str, w: int) -> int:
         "-Wall",
         "-DC_FLOW__OVERRIDE_TOP_W" f"-DC_FLOW__TOP_W={w}",
         f'--top-module "{project}"',
+        "-GW=32",
         "--unused-regexp UNUSED_*",
     ]
     commands_list.extend([f"-I{str(d)}" for d in included_dirs])

@@ -145,12 +145,8 @@ logic [W - 1:0]                        y_hi;
 logic [W - 1:0]                        y_lo;
 groups_vec_t                           y_groups;
 
-logic                                  any;
-
 logic [W - 1:0]                        y_priority;
 logic                                  y_priority_valid;
-logic [W - 1:0]                        y;
-logic [$clog2(W) - 1:0]                y_enc;
 
 logic                                  UNUSED__nets;
 
