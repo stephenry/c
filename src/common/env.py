@@ -48,6 +48,7 @@ def _project_root(anchor: str = "README.md") -> pathlib.Path:
 # Project root directory
 PROJECT_ROOT: pathlib.Path = _project_root("README.md")
 
+
 def setup_svlint() -> pathlib.Path | None:
     # Search global SVLINT_PATH environment variable.
     svlint_path = os.environ.get("SVLINT_EXE")

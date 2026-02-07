@@ -25,23 +25,33 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //========================================================================== //
 
-`ifndef RTL_ASSERTS_SVH
-`define RTL_ASSERTS_SVH
+`ifndef RTL_FLOPS_SVH
+`define RTL_FLOPS_SVH
 
-`define C_STATIC_ASSERT(__cond, __msg) \
-    initial if (!(__cond)) $error("[%m] C_STATIC_ASSERT: %s", __msg)
+`define C_DFF_RST(__type, __name, __clk, __arstn) \
+  __type __name``_r; \
+  __type __name``_w; \
+  always_ff @(posedge __clk or negedge __arstn) begin: __name``_reg \
+    if (!__arstn) begin \
+      __name``_r <= '0; \
+    end else begin \
+      __name``_r <= __name``_w; \
+    end \
+  end: __name``_reg
 
-`define C_ASSERT(__cond, __clk, __arst_n, __msg) \
-    /* verilator lint_off SYNCASYNCNET */ \
-    assert property (@(posedge __clk) disable iff (! __arst_n) __cond)  \
-      else $error("[%m] C_ASSERT: %s", __msg) \
-    /* verilator lint_on SYNCASYNCNET */
-
+`define C_DFF(__type, __name, __clk) \
+  __type __name``_r; \
+  __type __name``_w; \
+  always_ff @(posedge __clk) begin: __name``_reg \
+    __name``_r <= __name``_w; \
+  end: __name``_reg
 
 `else
-`undef RTL_ASSERTS_SVH
 
-`undef C_STATIC_ASSERT
-`undef C_ASSERT
+// Undefine
+`undef RTL_FLOPS_SVH
 
-`endif // RTL_ASSERTS_SVH
+`undef C_DFF_RST
+`undef C_DFF
+
+`endif

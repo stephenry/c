@@ -26,7 +26,6 @@
 ## ========================================================================= ##
 
 import pathlib
-import os
 import sys
 import common
 
@@ -36,17 +35,16 @@ TB_FILES = [
 
 
 def compile_and_run(
-    project: str, w: int, sources: list[pathlib.Path], include_dirs: list[pathlib.Path]
+    project: str,
+    w: int,
+    sources: list[pathlib.Path],
+    include_dirs: list[pathlib.Path],
+    top_module_name: str,
 ) -> None:
     from cocotb_tools.runner import get_runner
 
     def _escape_string(s: str) -> str:
         return f'"{s}"'
-
-    parameters = {
-        "W": w,
-        "P_UUT_NAME": _escape_string(project),
-    }
 
     build_dir = f"build_{project}_w{w}/tb"
 
@@ -55,11 +53,10 @@ def compile_and_run(
     runner = get_runner("verilator")
     runner.build(
         sources=sources,
-        hdl_toplevel="tb",
+        hdl_toplevel=top_module_name,
         build_dir=str(build_dir),
         waves=True,
         includes=include_dirs,
-        parameters=parameters,
         build_args=["--trace", "--timing", "-Wall"],
     )
 
@@ -67,7 +64,7 @@ def compile_and_run(
 
     sys.path.insert(0, str(test_module.parent))
 
-    runner.test(hdl_toplevel="tb", test_module="tests", waves=True)
+    runner.test(hdl_toplevel=top_module_name, test_module="tests", waves=True)
 
 
 def run_testbench(project: str, w: int) -> bool:
@@ -77,21 +74,28 @@ def run_testbench(project: str, w: int) -> bool:
     hdl_files, include_dirs = common.render_rtl(project, pathlib.Path(out_dir))
 
     # Add testbench to the HDL files
-    hdl_files.extend(TB_FILES)
+    from .top import render_top
+
+    top_path, top_module_name = render_top(
+        out_dir=pathlib.Path(out_dir),
+        uut=project,
+        params={"W": w},
+    )
+    hdl_files.append(top_path)
 
     # Compile and run the testbench using cocotb
-    compile_and_run(project, w, hdl_files, include_dirs)
+    compile_and_run(project, w, hdl_files, include_dirs, top_module_name)
 
     return True
 
 
-def driver():
-
-    for project in ["e"]:
-        for w in [8]:
-            print(f"Running testbench for project '{project}' with width {w}")
-            success = run_testbench(project, w=w)
-            if not success:
-                print(f"Testbench failed for project '{project}' with width {w}")
-                return 1
-            print(f"Testbench passed for project '{project}' with width {w}")
+# def driver():
+#
+#    for project in ["e"]:
+#        for w in [8]:
+#            print(f"Running testbench for project '{project}' with width {w}")
+#            success = run_testbench(project, w=w)
+#            if not success:
+#                print(f"Testbench failed for project '{project}' with width {w}")
+#                return 1
+#            print(f"Testbench passed for project '{project}' with width {w}")

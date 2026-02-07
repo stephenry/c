@@ -147,3 +147,6 @@ assign UNUSED__y = ^{ x_3_cout };
 assign y_o = y;
 
 endmodule : n_pos
+
+// Undefines
+`include "common_defs.svh"

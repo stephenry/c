@@ -38,4 +38,9 @@ endfunction : div_ceil
 
 endpackage : math_pkg
 
+`else
+
+// Undefine
+`undef RTL_MATH_PKG_SVH
+
 `endif

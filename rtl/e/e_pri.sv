@@ -59,6 +59,11 @@ logic                                      vld;
 // ========================================================================= //
 
 // ------------------------------------------------------------------------- //
+// The comment blocks below are a PLA (Programmable Logic Array)
+// specification for the logic. The PLA is a tabular representation 
+// of the logic function, where each row corresponds to a product term in
+// the logic. The blocks are rendered by a pre-processing script that
+// generates the corresponding logic equations.
 //
 case (W)
   2: begin : e_select_w2
@@ -334,3 +339,6 @@ assign vld_o = vld;
 assign cout_o = cout;
 
 endmodule : e_pri
+
+// Undefines
+`include "common_defs.svh"

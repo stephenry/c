@@ -29,7 +29,7 @@
 
 module ks #(
   // Width of input
-  parameter int W = `C_FLOW__TOP_W
+  parameter int W
 ) (
 // -------------------------------------------------------------------------- //
 // Inputs

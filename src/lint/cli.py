@@ -42,8 +42,7 @@ def lint_one_verilator(v_exe: pathlib.Path, project: str, w: int) -> int:
     commands_list = [
         "--lint-only",
         "-Wall",
-        "-DC_FLOW__OVERRIDE_TOP_W"
-        f"-DC_FLOW__TOP_W={w}",
+        "-DC_FLOW__OVERRIDE_TOP_W" f"-DC_FLOW__TOP_W={w}",
         f'--top-module "{project}"',
         "--unused-regexp UNUSED_*",
     ]
@@ -57,6 +56,7 @@ def lint_one_verilator(v_exe: pathlib.Path, project: str, w: int) -> int:
 
     cp = subprocess.run([str(v_exe), "-f", str(command_file)])
     return cp.returncode == 0
+
 
 def lint_all_verilator() -> int:
     v_exe = common.setup_verilator()
@@ -74,6 +74,7 @@ def lint_all_verilator() -> int:
 
     print(f"Linting PASS!")
     return 0
+
 
 def lint_one_svlint(svlint_exe: pathlib.Path, project: str, w: int) -> int:
     print(f"Linting project={project} w={w}...")
@@ -97,6 +98,7 @@ def lint_one_svlint(svlint_exe: pathlib.Path, project: str, w: int) -> int:
 
     cp = subprocess.run([str(svlint_exe), "-f", str(command_file)])
     return cp.returncode == 0
+
 
 def lint_all_svlint() -> int:
     svlint_exe = common.setup_svlint()

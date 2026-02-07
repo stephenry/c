@@ -34,8 +34,10 @@
 // Default nettype
 `default_nettype none
 
-`ifndef C_FLOW__OVERRIDE_TOP_W
-  `define C_FLOW__TOP_W 32
-`endif
+`else
+`undef RTL_COMMON_DEFS_SVH
+
+// Restore original nettype
+`default_nettype wire
 
 `endif // RTL_COMMON_DEFS_SVH

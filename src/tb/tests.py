@@ -129,11 +129,11 @@ async def generic_testbench(dut, test_cases):
 
     stimulus = []
     for x, pos in test_cases:
-        stimulus.append(generate_stimulus(dut.W.value, x, pos))
+        stimulus.append(generate_stimulus(dut.u_uut.W.value, x, pos))
 
     expected = []
     for x, pos in stimulus:
-        y, y_enc, any_o = generate_expected(dut.W.value, x, pos)
+        y, y_enc, any_o = generate_expected(dut.u_uut.W.value, x, pos)
         expected.append((y, y_enc, any_o))
 
     for a, b in zip(stimulus, expected):
@@ -161,8 +161,8 @@ async def generic_testbench(dut, test_cases):
 async def test_directed(dut):
     """Run the test of known test cases as specified in the top-level module."""
 
-    if dut.W.value != 16:
-        print(f"Testbench only supports W=16 for now (W={dut.W.value}).")
+    if dut.u_uut.W.value != 16:
+        print(f"Testbench only supports W=16 for now (W={dut.u_uut.W.value}).")
         return
 
     # Perform reset
@@ -184,7 +184,7 @@ async def test_directed(dut):
 @cocotb.test()
 async def test_randomized(dut):
 
-    W = dut.W.value.to_unsigned()
+    W = dut.u_uut.W.value.to_unsigned()
 
     # Perform reset
     await reset_sequence(dut, cycles_n=5)
@@ -207,7 +207,7 @@ async def test_edge_cases(dut):
 
     await reset_sequence(dut, cycles_n=5)
 
-    W = dut.W.value.to_unsigned()
+    W = dut.u_uut.W.value.to_unsigned()
 
     stimulus = []
 

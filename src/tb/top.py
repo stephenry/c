@@ -56,7 +56,6 @@ _TOP_SV = """\
 `include "common_defs.svh"
 
 module {{module_name}} (
-
   input wire logic [{{W}} - 1:0]                 x_i
 , input wire logic [$clog2({{W}}) - 1:0]         pos_i
 
@@ -65,10 +64,27 @@ module {{module_name}} (
 , output wire logic [{{W}} - 1:0]                y_o
 , output wire logic [$clog2({{W}}) - 1:0]        y_enc_o
 
-//
-, input wire logic                               clk
 , input wire logic                               arst_n
 );
+
+//========================================================================== //
+//                                                                           //
+// Clock                                                                     //
+//                                                                           //
+//========================================================================== //
+
+// NOTES: Typically, I would inject the clock from the testbench, but for
+// but in cocotb it seems like this is not supported when using Verilator
+// When attempting to drive the clk from the testbench, a
+// VPI related crash occurs. This is a known issue when using Verilator
+// with cocotb.
+
+logic clk;
+
+initial
+  clk = 0;
+
+always #5 clk = ~clk;
 
 //========================================================================== //
 //                                                                           //
@@ -76,38 +92,27 @@ module {{module_name}} (
 //                                                                           //
 //========================================================================== //
 
-// Top-Level
+{{uut}} #(.W({{W}})) u_uut (
 //
-{{uut}} {{uut_parameters}} u_uut (
-  //
-  .x_i                  (in_x_r)
-, .pos_i                (in_pos_r)
+  .x_i                  (x_i)
+, .pos_i                (pos_i)
 //
-, .any_o                (uut_any_o)
-, .y_o                  (uut_y_o)
-, .y_enc_o              (uut_y_enc_o)
+, .any_o                (any_o)
+, .y_o                  (y_o)
+, .y_enc_o              (y_enc_o)
 //
 , .clk                  (clk)
 , .arst_n               (arst_n)
 );
 
-//========================================================================== //
-//                                                                           //
-// Output                                                                    //
-//                                                                           //
-//========================================================================== //
-
-assign any_o = out_any_r;
-assign y_o = out_y_r;
-assign y_enc_o = out_y_enc_r;
-
 endmodule : {{module_name}}
+
 """
 
 import pathlib
 import jinja2
 
-_TOP_MODULE = "top"
+_TOP_MODULE = "tb"
 
 
 def render_top(

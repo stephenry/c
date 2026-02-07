@@ -27,6 +27,7 @@
 
 `include "common_defs.svh"
 `include "asserts.svh"
+`include "flops.svh"
 
 // Circuit to compute the circular left-most '0' in a vector 'x' for a
 // given position. 'any' flag indicates output validity.
@@ -53,7 +54,11 @@
 
 module n #(
   // Vector width
+`ifdef C_FLOW__OVERRIDE_TOP_W
   parameter int W = `C_FLOW__TOP_W
+`else
+  parameter int W
+`endif
 ) (
   input wire logic [W - 1:0]                     x_i
 , input wire logic [$clog2(W) - 1:0]             pos_i
@@ -62,6 +67,10 @@ module n #(
 , output wire logic [W - 1:0]                    y_o
 , output wire logic [$clog2(W) - 1:0]            y_enc_o
 , output wire logic                              any_o
+
+//
+, input wire logic                               clk
+, input wire logic                               arst_n
 );
 
 // ========================================================================= //
@@ -72,6 +81,21 @@ module n #(
 
 `C_STATIC_ASSERT(W > 0,
   "Unsupported vector width W; must be > 0");
+
+// ========================================================================= //
+//                                                                           //
+// Flop(s)                                                                   //
+//                                                                           //
+// ========================================================================= //
+
+// Inputs:
+`C_DFF(logic [W - 1:0], x, clk);
+`C_DFF(logic [$clog2(W) - 1:0], pos, clk);
+
+// Outputs:
+`C_DFF(logic [W - 1:0], y, clk);
+`C_DFF(logic [$clog2(W) - 1:0], y_enc, clk);
+`C_DFF_RST(logic, any, clk, arst_n);
 
 // ========================================================================= //
 //                                                                           //
@@ -92,28 +116,52 @@ logic [$clog2(W) - 1:0]                y_enc;
 // ========================================================================= //
 
 // ------------------------------------------------------------------------- //
+// Stage input flops
+assign x_w = x_i;
+assign pos_w = pos_i;
+
+// ------------------------------------------------------------------------- //
 //
-dec #(.W(W)) u_dec (.x_i(pos_i), .y_o(pos_dec));
+dec #(.W(W)) u_dec (.x_i(pos_r), .y_o(pos_dec));
 
 // ------------------------------------------------------------------------- //
 //
 for (genvar i = 0; i < W; i++) begin: for_each_pos_GEN
-  n_pos #(.POS(i), .W(W)) u_pos(.x_i(x_i), .y_o(y_matrix[i]));
+  n_pos #(.POS(i), .W(W)) u_pos(.x_i(x_r), .y_o(y_matrix[i]));
 end: for_each_pos_GEN
 
 // ------------------------------------------------------------------------- //
 //
-mux #(.N(W), .W(W)) u_max (.x_i(y_matrix), .sel_i(pos_dec), .y_o(y));
+mux #(.N(W), .W(W)) u_max (.x_i(y_matrix), .sel_i(pos_dec), .y_o(y_w));
 
 // ------------------------------------------------------------------------- //
 // 'Any' flag; indicate that a 'b0 is present in the input vector. The
 // output at y_* is therefore valid.
 //
-assign any = (x_i != '1);
+assign any_w = (x_r != '1);
 
 // ------------------------------------------------------------------------- //
 // Compute encoded output.
-enc #(.W(W)) u_enc (.x_i(y), .y_o(y_enc));
+enc #(.W(W)) u_enc (.x_i(y_w), .y_o(y_enc_w));
+
+// ========================================================================= //
+//                                                                           //
+// Assertions                                                                //
+//                                                                           //
+// ========================================================================= //
+
+
+// Validate that output bit-vector is one-hot when emitting a valid output.
+`C_ASSERT(any_r |-> $onehot(y_r), clk, arst_n,
+  "Expect 1hot output when 'any' is high");
+
+// Validate that 'any' is high when output is not all '0'.
+`C_ASSERT((x_r != '1) |=> any_r, clk, arst_n,
+  "Expect 'any' to be high when output is not all '0'");
+
+// Validate that output bit is '0' when 'any' is high.
+`C_ASSERT(any_w |-> (x_r & (1 << y_enc_w)) == '0, clk, arst_n,
+  "Expect output bit to be '0' when 'any' is high");
 
 // ========================================================================= //
 //                                                                           //
@@ -121,8 +169,13 @@ enc #(.W(W)) u_enc (.x_i(y), .y_o(y_enc));
 //                                                                           //
 // ========================================================================= //
 
-assign any_o = any;
-assign y_o = y;
-assign y_enc_o = y_enc;
+assign any_o = any_r;
+assign y_o = y_r;
+assign y_enc_o = y_enc_r;
 
 endmodule : n
+
+// Undefines
+`include "common_defs.svh"
+`include "asserts.svh"
+`include "flops.svh"

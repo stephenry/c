@@ -84,6 +84,7 @@ _INCLUDE_FILES = [
     "common_defs.svh",
     "math_pkg.svh",
     "asserts.svh",
+    "flos.svh",
 ]
 
 for i, f in enumerate(_INCLUDE_FILES):

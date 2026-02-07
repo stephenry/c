@@ -26,12 +26,13 @@
 //========================================================================== //
 
 `include "common_defs.svh"
+`include "asserts.svh"
 
 // Circuit to compute the first-zero (left-most) '0' in the input vector.
 
 module k_ff #(
   // Width of input
-  parameter int W = `C_FLOW__TOP_W
+  parameter int W
 
 , parameter bit DETECT_ZERO = 1'b1
 ) (
@@ -127,3 +128,7 @@ assign UNUSED__nets = &{ g_final };
 assign y_o = y;
 
 endmodule: k_ff
+
+// Undefines
+`include "common_defs.svh"
+`include "asserts.svh"

@@ -28,6 +28,7 @@
 `include "common_defs.svh"
 `include "math_pkg.svh"
 `include "asserts.svh"
+`include "flops.svh"
 
 // Circuit to compute the circular left-most '0' in a vector 'x' for a
 // given position. 'any' flag indicates output validity.
@@ -54,7 +55,11 @@
 
 module e #(
   // Vector width
+`ifdef C_FLOW__OVERRIDE_TOP_W
   parameter int W = `C_FLOW__TOP_W
+`else
+  parameter int W
+`endif
 
   // Radix (In range: [4,8])
 , parameter int RADIX_N = 4
@@ -66,6 +71,10 @@ module e #(
 , output wire logic [W - 1:0]                    y_o
 , output wire logic [$clog2(W) - 1:0]            y_enc_o
 , output wire logic                              any_o
+
+//
+, input wire logic                               clk
+, input wire logic                               arst_n
 );
 
 // ========================================================================= //
@@ -106,6 +115,21 @@ localparam int PADDING_BITS =
 
 // ========================================================================= //
 //                                                                           //
+// Flop(s)                                                                   //
+//                                                                           //
+// ========================================================================= //
+
+// Inputs:
+`C_DFF(logic [W - 1:0], x, clk);
+`C_DFF(logic [$clog2(W) - 1:0], pos, clk);
+
+// Outputs:
+`C_DFF(logic [W - 1:0], y, clk);
+`C_DFF(logic [$clog2(W) - 1:0], y_enc, clk);
+`C_DFF_RST(logic, any, clk, arst_n);
+
+// ========================================================================= //
+//                                                                           //
 // Wire(s)                                                                   //
 //                                                                           //
 // ========================================================================= //
@@ -137,19 +161,24 @@ logic                                  UNUSED__nets;
 // ========================================================================= //
 
 // ------------------------------------------------------------------------- //
+// Stage input flops
+assign x_w = x_i;
+assign pos_w = pos_i;
+
+// ------------------------------------------------------------------------- //
 // Compute selection vector.
 dec #(.W(W)) u_dec (
-  .x_i                       (pos_i)
+  .x_i                       (pos_r)
 , .y_o                       (pos_dec));
 
 // ------------------------------------------------------------------------- //
 // Compute input vector (padding if required).
 if (REQUIRES_PADDING) begin : gen_groups_padding
-  assign groups_in = { {PADDING_BITS{1'b0}}, x_i, x_i };
+  assign groups_in = { {PADDING_BITS{1'b0}}, x_r, x_r };
   assign groups_sel = { {PADDING_BITS{1'b0}}, pos_dec, pos_dec };
 end
 else begin : gen_groups_no_padding
-  assign groups_in = { x_i, x_i };
+  assign groups_in = { x_r, x_r };
   assign groups_sel = { pos_dec, pos_dec };
 end : gen_groups_no_padding
 
@@ -218,18 +247,36 @@ end: y_groups_no_padding_GEN
 //
 assign y_priority = (y_hi | y_lo);
 assign y_priority_valid = (y_priority != '0);
-assign y = y_priority_valid ? y_priority : pos_dec;
+assign y_w = y_priority_valid ? y_priority : pos_dec;
 
 // ------------------------------------------------------------------------- //
 // 'Any' flag; indicate that a 'b0 is present in the input vector. The
 // output at y_* is therefore valid.
 //
-assign any = (x_i != '1);
+assign any_w = (x_r != '1);
 
 
 // ------------------------------------------------------------------------- //
 // Compute encoded output.
-enc #(.W(W)) u_enc (.x_i(y), .y_o(y_enc));
+enc #(.W(W)) u_enc (.x_i(y_w), .y_o(y_enc_w));
+
+// ========================================================================= //
+//                                                                           //
+// Assertions                                                                //
+//                                                                           //
+// ========================================================================= //
+
+// Validate that output bit-vector is one-hot when emitting a valid output.
+`C_ASSERT(any_r |-> $onehot(y_r), clk, arst_n,
+  "Expect 1hot output when 'any' is high");
+
+// Validate that 'any' is high when output is not all '0'.
+`C_ASSERT((x_r != '1) |=> any_r, clk, arst_n,
+  "Expect 'any' to be high when output is not all '0'");
+
+// Validate that output bit is '0' when 'any' is high.
+`C_ASSERT(any_w |-> (x_r & (1 << y_enc_w)) == '0, clk, arst_n,
+  "Expect output bit to be '0' when 'any' is high");
 
 // ========================================================================= //
 //                                                                           //
@@ -246,8 +293,14 @@ assign UNUSED__nets = ^{ pri_GEN[0].carry };
 //                                                                           //
 // ========================================================================= //
 
-assign any_o = any;
-assign y_o = y;
-assign y_enc_o = y_enc;
+assign any_o = any_r;
+assign y_o = y_r;
+assign y_enc_o = y_enc_r;
 
 endmodule : e
+
+// Undefines
+`include "common_defs.svh"
+`include "math_pkg.svh"
+`include "asserts.svh"
+`include "flops.svh"
