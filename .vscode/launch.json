@@ -16,7 +16,8 @@
             "request": "launch",
             "module": "syn.cli",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/src"
+            "cwd": "${workspaceFolder}/src",
+            "args": ["--project", "n", "--width", "48"]
         },
         {
             "name": "Debug Lint",

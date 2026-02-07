@@ -28,6 +28,8 @@
 `ifndef RTL_ASSERTS_SVH
 `define RTL_ASSERTS_SVH
 
+`ifndef SYNTHESIS
+
 `define C_STATIC_ASSERT(__cond, __msg) \
     initial if (!(__cond)) $error("[%m] C_STATIC_ASSERT: %s", __msg)
 
@@ -36,6 +38,14 @@
     assert property (@(posedge __clk) disable iff (! __arst_n) __cond)  \
       else $error("[%m] C_ASSERT: %s", __msg) \
     /* verilator lint_on SYNCASYNCNET */
+
+`else
+
+// NOP-out assertions on synthesis flow.
+`define C_STATIC_ASSERT(__cond, __msg)
+`define C_ASSERT(__cond, __clk, __arst_n, __msg)
+
+`endif
 
 
 `else

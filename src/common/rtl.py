@@ -34,50 +34,56 @@ import tempfile
 from .env import PROJECT_ROOT
 
 
+RTL_ROOT = PROJECT_ROOT / "rtl"
+
 # Specific RTL files for each project
 _PROJECTS = {
     "s": [
-        "s.sv",
+        RTL_ROOT / "s" / "s.sv",
+        RTL_ROOT / "common" / "enc.sv",
+        RTL_ROOT / "common" / "inc.sv",
+        RTL_ROOT / "common" / "maske.sv",
+        RTL_ROOT / "common" / "mux.sv",
+        RTL_ROOT / "common" / "rev.sv",
     ],
     "r": [
-        "r.sv",
+        RTL_ROOT / "r" / "r.sv",
+        RTL_ROOT / "common" / "bs.sv",
+        RTL_ROOT / "common" / "bsi.sv",
+        RTL_ROOT / "common" / "enc.sv",
+        RTL_ROOT / "common" / "mux.sv",
+        RTL_ROOT / "common" / "pri.sv",
+        RTL_ROOT / "common" / "sel.sv",
     ],
     "e": [
-        "e.sv",
-        "e_pri.sv",
+        RTL_ROOT / "e" / "e.sv",
+        RTL_ROOT / "e" / "e_pri.sv",
+        RTL_ROOT / "common" / "dec.sv",
+        RTL_ROOT / "common" / "pri.sv",
+        RTL_ROOT / "common" / "enc.sv",
+        RTL_ROOT / "common" / "mux.sv",
     ],
     "n": [
-        "n.sv",
-        "n_pos.sv",
+        RTL_ROOT / "n" / "n.sv",
+        RTL_ROOT / "n" / "n_pos.sv",
+        RTL_ROOT / "common" / "dec.sv",
+        RTL_ROOT / "common" / "enc.sv",
+        RTL_ROOT / "common" / "rev.sv",
+        RTL_ROOT / "common" / "inc.sv",
+        RTL_ROOT / "common" / "mux.sv",
     ],
     "k": [
-        "k.sv",
-        "k_ff.sv",
+        RTL_ROOT / "k" / "k.sv",
+        RTL_ROOT / "k" / "k_ff.sv",
+        RTL_ROOT / "common" / "enc.sv",
+        RTL_ROOT / "common" / "ks.sv",
+        RTL_ROOT / "common" / "maske.sv",
+        RTL_ROOT / "common" / "rev.sv",
+        RTL_ROOT / "common" / "mux.sv",
     ],
 }
 
-for project, files in _PROJECTS.items():
-    _PROJECTS[project] = [(PROJECT_ROOT / "rtl" / project / f).resolve() for f in files]
-
 ALL_PROJECTS = _PROJECTS.keys()
-
-# Common RTL files used across multiple projects
-_COMMON_FILES = [
-    "enc.sv",
-    "inc.sv",
-    "maske.sv",
-    "mux.sv",
-    "rev.sv",
-    "bs.sv",
-    "bsi.sv",
-    "sel.sv",
-    "pri.sv",
-    "dec.sv",
-    "ks.sv",
-]
-
-for i, f in enumerate(_COMMON_FILES):
-    _COMMON_FILES[i] = (PROJECT_ROOT / "rtl" / "common" / f).resolve()
 
 # All RTL include directories
 _INCLUDE_FILES = [
@@ -230,7 +236,6 @@ def _compute_src_list(project: str) -> list[pathlib.Path]:
 
     file_list = []
     file_list.extend(_PROJECTS[project])
-    file_list.extend(_COMMON_FILES)
 
     return file_list
 

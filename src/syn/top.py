@@ -80,26 +80,16 @@ module {{module_name}} (
 //
 {{uut}} {{uut_parameters}} u_uut (
   //
-  .x_i                  (in_x_r)
-, .pos_i                (in_pos_r)
+  .x_i                  (x_i)
+, .pos_i                (pos_i)
 //
-, .any_o                (uut_any_o)
-, .y_o                  (uut_y_o)
-, .y_enc_o              (uut_y_enc_o)
+, .any_o                (any_o)
+, .y_o                  (y_o)
+, .y_enc_o              (y_enc_o)
 //
 , .clk                  (clk)
 , .arst_n               (arst_n)
 );
-
-//========================================================================== //
-//                                                                           //
-// Output                                                                    //
-//                                                                           //
-//========================================================================== //
-
-assign any_o = out_any_r;
-assign y_o = out_y_r;
-assign y_enc_o = out_y_enc_r;
 
 endmodule : {{module_name}}
 """

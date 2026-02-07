@@ -61,7 +61,7 @@ module r #(
 `endif
 
 // Infer shifter/rotator
-, parameter bit INFER = 1'b1
+, parameter bit INFER = 1'b0
 ) (
   input wire logic [W - 1:0]                     x_i
 , input wire logic [$clog2(W) - 1:0]             pos_i
@@ -256,6 +256,5 @@ assign y_enc_o = y_enc_r;
 endmodule : r
 
 // Undefines
-`include "common_defs.svh"
 `include "asserts.svh"
 `include "flops.svh"

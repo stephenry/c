@@ -95,23 +95,39 @@ localparam int STRIDE = (1 << sh);
 localparam int L_INDEX = (i - STRIDE);
 localparam int R_INDEX = (i + STRIDE);
 
-assign round_l[i] = (L_INDEX >= ROUND_LSB) ? round[sh + 1][L_INDEX] : 1'b0;
-assign round_r[i] = (R_INDEX <= ROUND_MSB) ? round[sh + 1][R_INDEX] : 1'b0;
+    if (sh == (SHIFT_W - 1)) begin: last_sh_GEN
+
+assign round_l[i] =
+  (L_INDEX >= ROUND_LSB) ? round_ext[L_INDEX] : 1'b0;
+
+assign round_r[i] =
+  (R_INDEX <= ROUND_MSB) ? round_ext[R_INDEX] : 1'b0;
+
+    end: last_sh_GEN
+    else begin: other_sh_GEN
+
+assign round_l[i] =
+  (L_INDEX >= ROUND_LSB) ? sh_GEN[sh + 1].round[L_INDEX] : 1'b0;
+
+assign round_r[i] = 
+  (R_INDEX <= ROUND_MSB) ? sh_GEN[sh + 1].round[R_INDEX] : 1'b0;
+
+    end: other_sh_GEN
 
   end : bit_GEN
 
-if (sh == (SHIFT_W - 1)) begin: last_sh_GEN
+  if (sh == (SHIFT_W - 1)) begin: last_sh_GEN
 
-  assign round[sh] =
-    shift_i[sh] ? (is_right_i ? round_r : round_l) : round_ext;
+assign round =
+  shift_i[sh] ? (is_right_i ? round_r : round_l) : round_ext;
 
-end: last_sh_GEN
-else begin: other_sh_GEN
+  end: last_sh_GEN
+  else begin: other_sh_GEN
 
-  assign round[sh] =
-    shift_i[sh] ? (is_right_i ? round_r : round_l) : sh_GEN[sh + 1].round;
+assign round =
+  shift_i[sh] ? (is_right_i ? round_r : round_l) : sh_GEN[sh + 1].round;
 
-end: other_sh_GEN
+  end: other_sh_GEN
 
 end : sh_GEN
 

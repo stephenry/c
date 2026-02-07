@@ -165,7 +165,7 @@ def run_job(design: str, params: plist, echo: bool = False) -> tuple[int, int, i
         pass
 
 
-def main(args: list[str] = None):
+def run_sweep(args: list[str] = None):
     try:
         # Try to setup Synlig and OpenSTA environments
         from .sta import setup_environment as setup_sta_environment
@@ -210,5 +210,52 @@ def main(args: list[str] = None):
     plot_results(common.PROJECT_ROOT / "docs" / "sweep.png", W_SWEEP, results)
 
 
+def syn(args: list[str] = None):
+    try:
+        # Try to setup Synlig and OpenSTA environments
+        from .sta import setup_environment as setup_sta_environment
+
+        setup_sta_environment()
+
+        from .yosys import setup_environment as setup_yosys_environment
+
+        setup_yosys_environment()
+
+    except EnvironmentError as e:
+        # Oops! Environment not setup correctly
+        print(f"Environment setup error: {e}")
+        return
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Synthesis CLI")
+    parser.add_argument(
+        "-p",
+        "--project",
+        type=str,
+        choices=projects.keys(),
+        required=True,
+        help="Project to synthesize",
+    )
+    parser.add_argument(
+        "-w",
+        "--width",
+        type=int,
+        required=True,
+        help="Width (W) parameter for the design under test",
+    )
+    args = parser.parse_args()
+    params = {"W": args.width}
+
+    print(f"Running job: project={args.project}, params={params['W']}")
+
+    # Run synthesis and STA on current parameterization
+    (total_area, sequential_area, f_max) = run_job(args.project, params, echo=True)
+
+    print("total_area: ", total_area)
+    print("sequential_area: ", sequential_area)
+    print("f_max: ", f_max)
+
+
 if __name__ == "__main__":
-    main()
+    syn()

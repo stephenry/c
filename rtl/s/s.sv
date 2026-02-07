@@ -274,6 +274,5 @@ assign y_enc_o = y_enc_r;
 endmodule : s
 
 // Undefines
-`include "common_defs.svh"
 `include "asserts.svh"
 `include "flops.svh"

@@ -130,5 +130,4 @@ assign y_o = y;
 endmodule: k_ff
 
 // Undefines
-`include "common_defs.svh"
 `include "asserts.svh"

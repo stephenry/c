@@ -25,7 +25,8 @@ packages = [
 [tool.poetry.scripts]
 driver = "tb.cli:main"
 regress = "tb.regress:run"
-synthesize = "syn.cli:main"
+synsweep = "syn.cli:run_sweep"
+syn = "syn.cli:syn"
 lint = "lint.cli:lint_all_svlint"
 vlint = "lint.cli:lint_all_verilator"
 

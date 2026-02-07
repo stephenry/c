@@ -50,7 +50,7 @@ def run():
         setup_environment()
 
         # (W)idth sweep values
-        WS = [4, 8, 16, 32, 64, 128]
+        WS = [4, 8, 16, 32, 48, 64, 56, 128]
 
         for project in common.ALL_PROJECTS:
             for w in WS:

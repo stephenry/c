@@ -34,10 +34,4 @@
 // Default nettype
 `default_nettype none
 
-`else
-`undef RTL_COMMON_DEFS_SVH
-
-// Restore original nettype
-`default_nettype wire
-
 `endif // RTL_COMMON_DEFS_SVH
