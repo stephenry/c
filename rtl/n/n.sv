@@ -160,6 +160,12 @@ enc #(.W(W)) u_enc (.x_i(y_w), .y_o(y_enc_w));
 `C_ASSERT(any_w |-> (x_r & (1 << y_enc_w)) == '0, clk, arst_n,
   "Expect output bit to be '0' when 'any' is high");
 
+if (W < (1 << $clog2(W))) begin: constrain_is_valid_pos_GEN
+  // Validate pos for non-power-of-2 widths.
+  `C_ASSERT(pos_r < W[$clog2(W) - 1:0], clk, arst_n,
+    "POS input must be less than W");
+end: constrain_is_valid_pos_GEN
+
 // ========================================================================= //
 //                                                                           //
 // Output(s)                                                                 //
