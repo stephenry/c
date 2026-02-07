@@ -91,6 +91,7 @@ class SynligRunner:
 
             cmds += [
                 "read_systemverilog -link",
+                f"read_liberty -lib {STDCELL_LIB_PATH}",
                 f"hierarchy -check -top {self._top}",
                 "flatten",
                 "proc",
@@ -100,7 +101,8 @@ class SynligRunner:
                 f"dfflibmap -liberty {STDCELL_LIB_PATH}",
                 f"abc -liberty {STDCELL_LIB_PATH}",
                 "opt",
-                "opt_clean -purge",
+                "flatten",
+                f"hierarchy -check -top {self._top}",
                 "check",
                 f"write_verilog -noattr -noexpr {str(self._syn_v)}",
                 f"stat -liberty {STDCELL_LIB_PATH}",
