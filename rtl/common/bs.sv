@@ -109,7 +109,7 @@ assign round_r[i] =
 assign round_l[i] =
   (L_INDEX >= ROUND_LSB) ? sh_GEN[sh + 1].round[L_INDEX] : 1'b0;
 
-assign round_r[i] = 
+assign round_r[i] =
   (R_INDEX <= ROUND_MSB) ? sh_GEN[sh + 1].round[R_INDEX] : 1'b0;
 
     end: other_sh_GEN

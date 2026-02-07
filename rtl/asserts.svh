@@ -30,13 +30,13 @@
 
 `ifndef SYNTHESIS
 
-`define C_STATIC_ASSERT(__cond, __msg) \
+`define C_STATIC_ASSERT(__cond, __msg)\
     initial if (!(__cond)) $error("[%m] C_STATIC_ASSERT: %s", __msg)
 
-`define C_ASSERT(__cond, __clk, __arst_n, __msg) \
-    /* verilator lint_off SYNCASYNCNET */ \
-    assert property (@(posedge __clk) disable iff (! __arst_n) __cond)  \
-      else $error("[%m] C_ASSERT: %s", __msg) \
+`define C_ASSERT(__cond, __clk, __arst_n, __msg)\
+    /* verilator lint_off SYNCASYNCNET */\
+    assert property (@(posedge __clk) disable iff (! __arst_n) __cond)\
+      else $error("[%m] C_ASSERT: %s", __msg)\
     /* verilator lint_on SYNCASYNCNET */
 
 `else

@@ -28,22 +28,22 @@
 `ifndef RTL_FLOPS_SVH
 `define RTL_FLOPS_SVH
 
-`define C_DFF_RST(__type, __name, __clk, __arstn) \
-  __type __name``_r; \
-  __type __name``_w; \
-  always_ff @(posedge __clk or negedge __arstn) begin: __name``_reg \
-    if (!__arstn) begin \
-      __name``_r <= '0; \
-    end else begin \
-      __name``_r <= __name``_w; \
-    end \
+`define C_DFF_RST(__type, __name, __clk, __arstn)\
+  __type __name``_r;\
+  __type __name``_w;\
+  always_ff @(posedge __clk or negedge __arstn) begin: __name``_reg\
+    if (!__arstn) begin\
+      __name``_r <= '0;\
+    end else begin\
+      __name``_r <= __name``_w;\
+    end\
   end: __name``_reg
 
-`define C_DFF(__type, __name, __clk) \
-  __type __name``_r; \
-  __type __name``_w; \
-  always_ff @(posedge __clk) begin: __name``_reg \
-    __name``_r <= __name``_w; \
+`define C_DFF(__type, __name, __clk)\
+  __type __name``_r;\
+  __type __name``_w;\
+  always_ff @(posedge __clk) begin: __name``_reg\
+    __name``_r <= __name``_w;\
   end: __name``_reg
 
 `else
