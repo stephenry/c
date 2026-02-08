@@ -25,22 +25,9 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ## ========================================================================= ##
 
+import common
 import os
 import pathlib
-
-
-def setup_environment():
-    global OPENSTA_EXECUTABLE
-
-    opensta_root = os.environ.get("OPENSTA_ROOT")
-    if opensta_root is None:
-        raise EnvironmentError("OPENSTA_ROOT environment variable is not set.")
-
-    opensta = pathlib.Path(opensta_root) / "build" / "sta"
-    if not opensta.exists():
-        raise EnvironmentError(f"OpenSTA executable not found at: {opensta}")
-
-    OPENSTA_EXECUTABLE = str(opensta.resolve())
 
 
 class OpenSTARunner:
@@ -94,16 +81,23 @@ class OpenSTARunner:
             f.write("\n".join(cmds) + "\n")
 
     def _run_opensta(self) -> int:
-        from subprocess import Popen, PIPE
+        try:
+            from subprocess import Popen, PIPE
 
-        p = Popen(
-            [OPENSTA_EXECUTABLE, "-exit", self._opensta_file],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=self._path,
-        )
-        output, err = p.communicate()
-        return p.returncode, output.decode()
+            opensta_executable = common.setup_opensta()
+            p = Popen(
+                [opensta_executable, "-exit", self._opensta_file],
+                stdout=PIPE,
+                stderr=PIPE,
+                cwd=self._path,
+            )
+            output, err = p.communicate()
+            return p.returncode, output.decode()
+        except EnvironmentError as e:
+            import sys
+
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
 
     def _scan_opensta_output(self, stdout: str):
         import re

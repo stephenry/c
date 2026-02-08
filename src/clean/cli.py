@@ -29,14 +29,14 @@ import glob
 import common
 import shutil
 
+
 def main():
-    for f in glob.glob(
-        "**/build*",
-        root_dir=common.PROJECT_ROOT, recursive=True):
+    for f in glob.glob("**/build*", root_dir=common.PROJECT_ROOT, recursive=True):
         path = common.PROJECT_ROOT / f
         if path.is_dir():
             print(f"Cleaning {path}...")
             shutil.rmtree(path)
+
 
 if __name__ == "__main__":
     main()

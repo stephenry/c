@@ -127,3 +127,39 @@ def setup_abc() -> pathlib.Path | None:
 
     # ABC not found.
     return None
+
+
+def setup_synlig():
+    global SYNLIG_EXECUTABLE
+
+    synlig_exe = os.environ.get("SYNLIG_EXE")
+    if synlig_exe:
+        return synlig_exe
+
+    # Otherwise, search known path
+    synlig_paths = [
+        pathlib.Path("/usr/local/bin"),
+    ]
+
+    for path in synlig_paths:
+        synlig = path / "synlig"
+        if synlig.exists():
+            SYNLIG_EXECUTABLE = str(synlig.resolve())
+            return SYNLIG_EXECUTABLE
+
+    # Otherwise not found.
+    return None
+
+
+def setup_opensta():
+    global OPENSTA_EXECUTABLE
+
+    opensta_root = os.environ.get("OPENSTA_ROOT")
+    if opensta_root is None:
+        raise EnvironmentError("OPENSTA_ROOT environment variable is not set.")
+
+    opensta = pathlib.Path(opensta_root) / "build" / "sta"
+    if not opensta.exists():
+        raise EnvironmentError(f"OpenSTA executable not found at: {opensta}")
+
+    return opensta.resolve()

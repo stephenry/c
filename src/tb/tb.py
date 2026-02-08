@@ -46,7 +46,7 @@ def compile_and_run(
     def _escape_string(s: str) -> str:
         return f'"{s}"'
 
-    build_dir = f"build_{project}_w{w}/tb"
+    build_dir = common.compute_sim_build_dir(project, {"W": w})
 
     # cocotb runner expects verilator to be in the PATH
     # at this point.
@@ -68,7 +68,7 @@ def compile_and_run(
 
 
 def run_testbench(project: str, w: int) -> bool:
-    out_dir = f"build_{project}_w{w}/rtl"
+    out_dir = common.compute_sim_rtl_dir(project, {"W": w})
 
     # Copy all sources to a temporary directory and render top-level testbench
     hdl_files, include_dirs = common.render_rtl(project, pathlib.Path(out_dir))
@@ -87,15 +87,3 @@ def run_testbench(project: str, w: int) -> bool:
     compile_and_run(project, w, hdl_files, include_dirs, top_module_name)
 
     return True
-
-
-# def driver():
-#
-#    for project in ["e"]:
-#        for w in [8]:
-#            print(f"Running testbench for project '{project}' with width {w}")
-#            success = run_testbench(project, w=w)
-#            if not success:
-#                print(f"Testbench failed for project '{project}' with width {w}")
-#                return 1
-#            print(f"Testbench passed for project '{project}' with width {w}")

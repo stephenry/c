@@ -23,24 +23,11 @@
 ## CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ## POSSIBILITY OF SUCH DAMAGE.
-## ========================================================================= ##
+## =======
 
+import common
 import os
 import pathlib
-
-
-def setup_environment():
-    global SYNLIG_EXECUTABLE
-
-    synlig_root = os.environ.get("SYNLIG_ROOT")
-    if synlig_root is None:
-        raise EnvironmentError("SYNLIG_ROOT environment variable is not set.")
-
-    synlig = pathlib.Path(synlig_root) / "synlig"
-    if not synlig.exists():
-        raise EnvironmentError(f"Synlig executable not found at: {synlig}")
-
-    SYNLIG_EXECUTABLE = str(synlig.resolve())
 
 
 class SynligRunner:
@@ -110,16 +97,24 @@ class SynligRunner:
             f.write("\n".join(cmds) + "\n")
 
     def _run_synlig(self) -> int:
-        from subprocess import Popen, PIPE
+        try:
+            from subprocess import Popen, PIPE
 
-        p = Popen(
-            [SYNLIG_EXECUTABLE, "-s", self._script_tcl],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=self._path,
-        )
-        output, err = p.communicate()
-        return (p.returncode, output.decode())
+            synlig_exe = common.setup_synlig()
+
+            p = Popen(
+                [synlig_exe, "-s", self._script_tcl],
+                stdout=PIPE,
+                stderr=PIPE,
+                cwd=self._path,
+            )
+            output, _ = p.communicate()
+            return (p.returncode, output.decode())
+        except EnvironmentError as e:
+            import sys
+
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
 
     def _scan_synlig_output(self, stdout: str):
         import re

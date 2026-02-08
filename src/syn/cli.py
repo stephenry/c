@@ -25,6 +25,7 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ## ========================================================================= ##
 
+import common
 import os
 import pathlib
 from collections.abc import Generator
@@ -43,23 +44,6 @@ W_SWEEP = range(8, 64 + 1, 8)
 RADIX_SWEEP = [4]
 
 F_SWEEP_MHZ = range(10, 200, 10)
-
-BUILD_ROOT = pathlib.Path("build")
-
-
-def _compute_dir(design: str, params: plist) -> pathlib.Path:
-    dir_name = design
-    for param, value in params.items():
-        dir_name += f"_{param}{value}"
-    return (BUILD_ROOT / dir_name).resolve()
-
-
-def _compute_rtl_dir(design: str, params: plist) -> pathlib.Path:
-    return _compute_dir(design, params) / "rtl"
-
-
-def _compute_build_dir(design: str, params: plist) -> pathlib.Path:
-    return _compute_dir(design, params) / "syn"
 
 
 def _width_parameterization():
@@ -110,7 +94,7 @@ def compute_jobs() -> Generator[tuple[str, plist]]:
 
 
 def run_job(design: str, params: plist, echo: bool = False) -> tuple[int, int, int]:
-    rtl_dir = _compute_rtl_dir(design, params)
+    rtl_dir = common.compute_syn_rtl_dir(design, params)
 
     # Render RTL to destination directory.
     (filelist, includedirs) = common.render_rtl(design, rtl_dir)
@@ -124,7 +108,7 @@ def run_job(design: str, params: plist, echo: bool = False) -> tuple[int, int, i
     try:
         from .yosys import SynligRunner
 
-        build_dir = _compute_build_dir(design, params)
+        build_dir = common.compute_syn_build_dir(design, params)
         os.makedirs(build_dir, exist_ok=True)
 
         syn_v = (build_dir / "top_syn.v").resolve()
@@ -167,14 +151,8 @@ def run_job(design: str, params: plist, echo: bool = False) -> tuple[int, int, i
 
 def run_sweep(args: list[str] = None):
     try:
-        # Try to setup Synlig and OpenSTA environments
-        from .sta import setup_environment as setup_sta_environment
-
-        setup_sta_environment()
-
-        from .yosys import setup_environment as setup_yosys_environment
-
-        setup_yosys_environment()
+        common.setup_synlig()
+        common.setup_opensta()
 
     except EnvironmentError as e:
         # Oops! Environment not setup correctly
@@ -213,13 +191,8 @@ def run_sweep(args: list[str] = None):
 def syn(args: list[str] = None):
     try:
         # Try to setup Synlig and OpenSTA environments
-        from .sta import setup_environment as setup_sta_environment
-
-        setup_sta_environment()
-
-        from .yosys import setup_environment as setup_yosys_environment
-
-        setup_yosys_environment()
+        common.setup_opensta()
+        common.setup_synlig()
 
     except EnvironmentError as e:
         # Oops! Environment not setup correctly

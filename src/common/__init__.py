@@ -26,7 +26,20 @@
 ## ========================================================================= ##
 
 from .rtl import render_rtl, ALL_PROJECTS
-from .env import PROJECT_ROOT, setup_verilator, setup_abc, setup_svlint
+from .env import (
+    PROJECT_ROOT,
+    setup_verilator,
+    setup_abc,
+    setup_svlint,
+    setup_opensta,
+    setup_synlig,
+)
+from .build import (
+    compute_sim_rtl_dir,
+    compute_sim_build_dir,
+    compute_syn_rtl_dir,
+    compute_syn_build_dir,
+)
 
 __all__ = (
     # rtl:
@@ -37,4 +50,9 @@ __all__ = (
     "setup_verilator",
     "setup_abc",
     "setup_svlint",
+    # build:
+    "compute_sim_rtl_dir",
+    "compute_sim_build_dir",
+    "compute_syn_rtl_dir",
+    "compute_syn_build_dir",
 )
