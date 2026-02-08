@@ -180,16 +180,7 @@ cell area for a given 'W' is constant across each design.
 
 #### Limitations
 
-I am limited by the availability of open-source EDA tools. As such
-the above PPA analysis was performed using only a netlist. In reality,
-timing is heavily dependent on wire-delay. Wire delay can be estimated
-at a high-level using Wire-Load Models or by forming a physical
-placement and routing trial of the netlist. The true wire delay
-can only be computed from a fully placed-/routed- and RC-extraced
-design. I lack the tools to perform such detailed estimate, therefore
-timing results are present in the absence of wiring delay. As such
-the computed timing figures are an **underestimate** of the final
-routed design in silicon.
+I am limited by the availability of open-source EDA tools. As a result, the PPA analysis above was performed using only a netlist. In practice, timing is heavily influenced by wire delay, which can be estimated at a high level using wire-load models or through a preliminary physical placement and routing trial of the netlist. True wire delay can only be accurately determined from a fully placed-and-routed design with RC extraction. Lacking the tools to perform such detailed estimation, the timing results presented here exclude wire delay and should therefore be considered an *underestimate* of the final routed design in silicon.
 
 Similarly, area cannot be computed purely from just cell-area. In
 a final GDS, overall area is some function of utilization, floorplan
