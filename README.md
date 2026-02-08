@@ -180,13 +180,9 @@ cell area for a given 'W' is constant across each design.
 
 #### Limitations
 
-I am limited by the availability of open-source EDA tools. As a result, the PPA analysis above was performed using only a netlist. In practice, timing is heavily influenced by wire delay, which can be estimated at a high level using wire-load models or through a preliminary physical placement and routing trial of the netlist. True wire delay can only be accurately determined from a fully placed-and-routed design with RC extraction. Lacking the tools to perform such detailed estimation, the timing results presented here exclude wire delay and should therefore be considered an *underestimate* of the final routed design in silicon.
+I am limited by the availability of open-source EDA tools. As a result, the PPA analysis above was performed using only a netlist. In practice, timing is heavily influenced by wire delay, which can be estimated at a high level using wire-load models or through a preliminary physical placement and routing trial of the netlist. True wire delay can only be accurately determined from a fully placed-and-routed design with RC extraction. Lacking the tools to perform such detailed estimation, the timing results presented here exclude wire delay and should therefore be considered an **underestimate** of the final routed design in silicon.
 
-Similarly, area cannot be computed purely from just cell-area. In
-a final GDS, overall area is some function of utilization, floorplan
-and routability. The cells themselves may be changed in the backend
-for timing and/or power purposes. As such, the area figures are
-an **underestimate** of the final routed design in silicon.
+Similarly, area cannot be accurately determined from cell area alone. In a final GDSII, total die area depends on placement utilization, floorplan efficiency, and wire routability. Backend optimizations may also replace cells to meet timing or power targets. Consequently, the area figures reported here represent an **underestimate** of the final routed design in silicon.
 
 
 ## Instructions
