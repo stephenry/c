@@ -24,18 +24,18 @@ encountered in a right circular walk from a bit 'pos'.
 | 0010_1010_0011_0111 |   8 | 0000_0000_1000_0000 |  7     |  1
 | 1111_1111_1111_1111 |   X | XXXX_XXXX_XXXX_XXXX |  X     |  0
 
-## Motivation
+## Motivation
 
 The above circuit was discussed on my company's Slack with competing
 solutions provided. A number of individuals advocated for very
 optimized, hand-written solutions while others advocated for high-level
-solutions that offloaded complex onto the synthesis engine. Initial
+solutions that offloaded complexity onto the synthesis engine. Initial
 analysis' suggest that synthesis can often produce a better final
 result when it has an understanding of the intended function of the
 logic. This is in contrast to highly optimized handwritten solutions
 from which the high-level function might be less obvious.
 
-I thought it would be interesting to: explore various design 
+I thought it would be interesting to explore various design 
 approaches to this problem an explore their relative PPA performance
 using widely available open-source tools. I also wanted to
 explore the use of cocotb for verification; a library that to
