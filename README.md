@@ -6,7 +6,7 @@
 
 ## Synopsis
 
-A PPA comparison of four RTL styles for offset leading-zero detection using cocotb verification and open-source synthesis flow.
+Weekend exploration project comparing five RTL styles for offset leading-zero detection, synthesized with open-source flow (Synlig/Yosys/ABC/OpenSTA) on SkyWater 130 nm.
 
 ## Problem Statement
 
