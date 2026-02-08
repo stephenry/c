@@ -13,7 +13,8 @@
 				"ms-vscode.cmake-tools",
 				"ms-python.python",
 				"ms-python.debugpy",
-				"EditorConfig.EditorConfig"
+				"EditorConfig.EditorConfig",
+				"mshr-h.veriloghdl"
 			]
 		}
 	}

@@ -37,11 +37,39 @@ RUN apt-get update \
       libeigen3-dev \
       tcl-dev \
       tcl-tclreadline \
+      gcc-11 \
+      g++-11 \
+      tclsh \
+      ant \
+      default-jre \
+      swig \
+      google-perftools \
+      libgoogle-perftools-dev \
+      python3 \
+      python3-pip \
+      uuid \
+      uuid-dev \
+      tcl-dev \
+      flex \
+      libfl-dev \
+      git \
+      pkg-config \
+      libreadline-dev \
+      bison \
+      libffi-dev \
+      wget \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
 # Switch to vscode user
 WORKDIR /tools
+RUN git clone https://github.com/chipsalliance/synlig.git \
+  && cd synlig \
+  && git submodule sync \
+  && git submodule update --init --recursive third_party/surelog \
+  && git submodule update --init --recursive third_party/yosys \
+  && make install
+ENV SYNLIG_EXE=/usr/local/bin/synlig
 
 # Build ABC
 WORKDIR /tools
@@ -54,13 +82,6 @@ ENV ABC_EXE=${ABC_ROOT}/abc
 
 # Install poetry
 RUN pip install poetry
-
-# Synlig - Download and extract to the tools subdir
-RUN wget https://github.com/chipsalliance/synlig/releases/download/2024-12-10-2d838ed/synlig-2d838ed-2024-12-10.tar.gz \
-    && tar -xzf synlig-2d838ed-2024-12-10.tar.gz \
-    && chown -R vscode synlig/ \
-    && rm synlig-2d838ed-2024-12-10.tar.gz
-ENV SYNLIG_ROOT=/tools/synlig
 
 # Install volare PDK manager
 RUN pip install volare
