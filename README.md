@@ -179,14 +179,14 @@ placement and routing trial of the netlist. The true wire delay
 can only be computed from a fully placed-/routed- and RC-extraced
 design. I lack the tools to perform such detailed estimate, therefore
 timing results are present in the absence of wiring delay. As such
-the computed timing figures are an _underestimate_ of the final
+the computed timing figures are an **underestimate** of the final
 routed design in silicon.
 
 Similarly, area cannot be computed purely from just cell-area. In
 a final GDS, overall area is some function of utilization, floorplan
 and routability. The cells themselves may be changed in the backend
 for timing and/or power purposes. As such, the area figures are
-an _underestimate_ of the final routed design in silicon.
+an **underestimate** of the final routed design in silicon.
 
 
 ## Instructions
