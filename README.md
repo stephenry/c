@@ -192,7 +192,8 @@ poetry install
 Linting can be performed using:
 
 ```
-poetry run lint
+poetry run lint # Run svlint flow
+poetry run vlint # Run Verilator lint flow
 ```
 
 ### Simulation
@@ -200,30 +201,20 @@ poetry run lint
 A design can be tested by invoking:
 
 ```
-poetry run driver -p $PROJECT -w $WIDTH
+poetry run driver -p $PROJECT -w $WIDTH  # Individual test instance
+poetry run regress # Full design regression.
 ```
 
 Where "$PROJECT" and "$WIDTH" denote the project and its width
 respectively.
-
-### Regresssion
-
-A full regression can be invoked using:
-
-```
-poetry run regress
-```
-
-This invokes the verification flow for each design across a 'W'
-sweap and various parameterizations.
 
 ### Synthesis
 
 To invoke synthesis, run the following command:
 
 ```
-poetry run syn
+poetry run syn -p $PROJECT -w $WIDTH # Individual synthesis trial
+poetry run synsweep # Run full synthesis flow across all designs
 ```
 
-This command shall recreate the PNG file illustrating area/frequency
-performance of each design across 'W'.
+The 'synsweep' command can be used to recreate the [chart](./dcos/sweep.png).
