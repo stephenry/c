@@ -36,7 +36,7 @@ logic. This is in contrast to highly optimized handwritten solutions
 from which the high-level function might be less obvious.
 
 I thought it would be interesting to explore various design 
-approaches to this problem an explore their relative PPA performance
+approaches to this problem an exploration of their relative PPA performance
 using widely available open-source tools. I also wanted to
 explore the use of cocotb for verification; a library that to
 date I had limited exposure.
@@ -61,12 +61,12 @@ case-statement.
 #### (R) Rotator [r.sv](./rtl/s/s.sv):
 
 The input vector is rotated according to 'pos'. A standard
-priorization network is applied to the rotated result to compute
+prioritization network is applied to the rotated result to compute
 the location of the first '0' in the vector. The 1-hot result
 is rotated back into the original position to produce the
-result. Although minimal logic is infered to compute the result,
+result. Although minimal logic is inferred to compute the result,
 the long combinatorial path through two barrel-shifter
-networks (depth proportional to O(lognW)) and a priorization
+networks (depth proportional to O(lognW)) and a prioritization
 network could present timing challenges for large 'W'.
 
 #### (S) Special [s.sv](./rtl/s/s.sv):
@@ -131,7 +131,7 @@ to compute the result.
 The [Rotator Solution (R)](./rtl/r/r.sv) unsurprisingly demonstrates very poor
 timing performance with increasing 'W'. The overall area
 growth however is relatively surprising since barrel-shifters
-and priorization networks can be inferred efficiently by
+and prioritization networks can be inferred efficiently by
 synthesis. A [previous study](http://www.github.com/stephenry/u)
 has shown that prioritization networks such as [pri.sv](./rtl/common/pri.sv)
 are not efficient. Discussion with colleagues suggests that
@@ -139,7 +139,7 @@ suprior PPA can be achieved by writing simplistic implementations
 in RTL and allowing the synthesis tool to optimize as necessary.
 There is perhaps some justification in this belief.
 
-The and-written PLA-table based solution of  ['E'](./rtl/e/e.sv) yields
+The hand-written PLA-table based solution of  ['E'](./rtl/e/e.sv) yields
 competitive results. From an area perspective it is efficient
 for large 'W'. It appears to be less timing resilient than
 the standard CLA-based solution 'S'. 
@@ -147,11 +147,20 @@ the standard CLA-based solution 'S'.
 The [Kogge-Stone solution (K)](./rtl/k/k.sv) appears to provide the best of
 both worlds: impressive area scaling with increasing 'W',
 and timing performance comparable to the Naive solution.
-From the results obtain, it is perhaps safe to conclude 
+From the results obtained, it is perhaps safe to conclude 
 that 'k' presents the best overall solution from a PPA
 perspective. It would perhaps be worthwhile investigating
 this approach for higher Radix KS trees (where Radix
 is defined as the number of leafs consumed on each layer.)
+
+#### Summary
+
+| Width | Best Area | Best Frequency | Best Overall
+|:----: | :-------: | :------------: | :-----------:
+|  8    |  K        | N              | tie
+| 16    |  K        | N              | N
+| 32    |  K        | N              | K
+| 64    |  K        | N              | K/N
 
 ### Methodology
 
@@ -192,7 +201,7 @@ an **underestimate** of the final routed design in silicon.
 ## Instructions
 
 The flow is scripted using Python. Verification is performed using
-cocotb and Verilator. Synthesis is performed using Berkley's ABC
+cocotb and Verilator. Synthesis is performed using Berkeley's ABC
 Synthesis tool, the Synlig front-end for Yosys and OpenSTA.
 
 The [Dockerfile](./devcontainer/Dockerfile) is the recommended
@@ -237,4 +246,12 @@ poetry run syn -p $PROJECT -w $WIDTH # Individual synthesis trial
 poetry run synsweep # Run full synthesis flow across all designs
 ```
 
-The 'synsweep' command can be used to recreate the [chart](./dcos/sweep.png).
+The 'synsweep' command can be used to recreate the [chart](./docs/sweep.png).
+
+## Future work
+
+A clear limitation of the current results is the inability to provide
+fully accurate area and frequency figures. This can be overcome by
+recreating a representative Back-End flow. Flows such as OpenROAD
+provide the ability to do this, but do so with added complexity and so
+have not been explored.
