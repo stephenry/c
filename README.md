@@ -1,4 +1,4 @@
-# U
+# Offset Leading-Zero Detector – PPA Comparison of RTL Architectures
 
 [![cocotb](https://img.shields.io/badge/verification-cocotb-4A90E2)](https://github.com/cocotb/cocotb)
 [![SystemVerilog](https://img.shields.io/badge/language-SystemVerilog-blue)](https://ieeexplore.ieee.org/document/8299595)
@@ -13,7 +13,7 @@ A PPA comparison of four RTL styles for offset leading-zero detection using coco
 For an arbitrary W-bit vector ('x'), find the first '0'-bit
 encountered in a right circular walk from a bit 'pos'. 
 
-Examples as follows:
+### Examples of offset leading-zero detection (W=16 for illustration)
 
 | x                   | pos | y                   | y_enc  | any
 |---------------------|:---:|---------------------|:-----:|:----:
@@ -22,7 +22,24 @@ Examples as follows:
 | 0000_0000_0000_0000 |   1 | 0000_0000_0000_0001 |  0     |  1
 | 0000_0000_0000_0000 |  15 | 0100_0000_0000_0000 |  14    |  1
 | 0010_1010_0011_0111 |   8 | 0000_0000_1000_0000 |  7     |  1
-| 1111_1111_1111_1111 |   x | xxxx_xxxx_xxxx_xxxx |  x     |  0
+| 1111_1111_1111_1111 |   X | XXXX_XXXX_XXXX_XXXX |  X     |  0
+
+## Motivation
+
+The above circuit was discussed on my company's Slack with competing
+solutions provided. A number of individuals advocated for very
+optimized, hand-written solutions while others advocated for high-level
+solutions that offloaded complex onto the synthesis engine. Initial
+analysis' suggest that synthesis can often produce a better final
+result when it has an understanding of the intended function of the
+logic. This is in contrast to highly optimized handwritten solutions
+from which the high-level function might be less obvious.
+
+I thought it would be interesting to: explore various design 
+approaches to this problem an explore their relative PPA performance
+using widely available open-source tools. I also wanted to
+explore the use of cocotb for verification; a library that to
+date I had limited exposure.
 
 ## Realizations
 
